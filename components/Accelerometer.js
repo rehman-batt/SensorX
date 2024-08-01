@@ -1,6 +1,7 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { Accelerometer } from 'expo-sensors';
 import { useState, useEffect } from 'react';
+import { styles } from '../styles/SensorStyles';
 
 export default function Accelero() {
 
@@ -39,22 +40,3 @@ export default function Accelero() {
 
     );
 }
-
-const styles = StyleSheet.create({
-    title: {
-        fontWeight: 'bold',
-        marginBottom: '3%',
-        color: 'blue'
-    },
-    container: {
-        flex: 0.15,
-        width: '80%',
-        backgroundColor: '#fff',
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderWidth: 1,
-        borderRadius: 20,
-        marginBottom: '3%',
-
-    },
-});

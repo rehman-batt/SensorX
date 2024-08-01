@@ -1,5 +1,5 @@
-import MapView, { Marker } from 'react-native-maps';
 import { StyleSheet, View } from 'react-native';
+import MapView, { Marker } from 'react-native-maps';
 
 export default function Map({ route }) {
 
