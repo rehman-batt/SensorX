@@ -3,7 +3,7 @@ import Gyro from './components/Gyro.js';
 import Accelero from './components/Accelerometer.js';
 import LatLong from './components/LatLong.js';
 
-export default function App() {
+export default function Home() {
 
   return (
     <View style={styles.container}>
