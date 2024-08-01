@@ -2,10 +2,9 @@ import { StyleSheet, Text, View } from 'react-native';
 import * as Location from 'expo-location';
 import { useState, useEffect } from 'react';
 
-export default function LatLong() {
+export default function LatLong({setLatitude, setLongitude, latitude, longitude}) {
 
-    const [latitude, setLatitude] = useState(null);
-    const [longitude, setLongitude] = useState(null);
+    
     const [errorMsg, setErrorMsg] = useState('Please provide permission to access location');
 
     useEffect(() => {

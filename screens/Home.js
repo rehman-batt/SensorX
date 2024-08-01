@@ -1,17 +1,21 @@
 import { StyleSheet, View, Text, Pressable } from 'react-native';
-import Gyro from './components/Gyro.js';
-import Accelero from './components/Accelerometer.js';
-import LatLong from './components/LatLong.js';
+import { useState } from 'react';
+import Gyro from '../components/Gyro.js';
+import Accelero from '../components/Accelerometer.js';
+import LatLong from '../components/LatLong.js';
 
-export default function Home() {
+export default function Home({ navigation }) {
+  
+  const [latitude, setLatitude] = useState(null);
+  const [longitude, setLongitude] = useState(null);
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Sensor Data</Text>
       <Gyro />  
       <Accelero />
-      <LatLong />
-      <Pressable style={styles.button} onPress={()=>console.log('abc')}>
+      <LatLong latitude={latitude} longitude={longitude} setLatitude={setLatitude} setLongitude={setLongitude} />
+      <Pressable style={styles.button} onPress={() => navigation.navigate("Map", {latitude, longitude})}>
         <Text style={styles.text}>SHOW ON MAP</Text>
       </Pressable>
     </View>
