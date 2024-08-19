@@ -4,9 +4,9 @@ import { styles } from '../styles/SensorStyles';
 import * as Location from 'expo-location';
 
 
-export default function LatLong({updateLatLong, latitude, longitude}) {
+export default function LatLong({ updateLatLong, latitude, longitude, delay }) {
 
-    
+
     const [errorMsg, setErrorMsg] = useState('Please provide permission to access location');
 
     useEffect(() => {
@@ -24,11 +24,24 @@ export default function LatLong({updateLatLong, latitude, longitude}) {
             let location = await Location.getCurrentPositionAsync({});
 
             updateLatLong(location.coords.latitude, location.coords.longitude);
-           
+
         })();
 
-        
+
     }, []);
+
+    useEffect(() => {
+        const fn = async () => {
+            let location = await Location.getCurrentPositionAsync({});
+            updateLatLong(location.coords.latitude, location.coords.longitude);
+        }
+
+        let update = setTimeout(fn, delay);
+
+        return () => {
+            clearTimeout(update);
+        };
+    })
 
     return (
 
@@ -42,7 +55,7 @@ export default function LatLong({updateLatLong, latitude, longitude}) {
                     <Text>
                         Long: {longitude}
                     </Text>
-                    
+
                 </>
             }
 

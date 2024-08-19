@@ -1,9 +1,9 @@
 import { Text, View } from 'react-native';
-import { Gyroscope } from 'expo-sensors';
+import { Magnetometer } from 'expo-sensors';
 import { useState, useEffect } from 'react';
 import { styles } from '../styles/SensorStyles';
 
-export default function Gyro({delay}) {
+export default function Magnet({delay}) {
 
     const [{ x, y, z }, setData] = useState({
         x: 0,
@@ -12,12 +12,12 @@ export default function Gyro({delay}) {
     });
 
     const [subscription, setSubscription] = useState(null);
-    Gyroscope.setUpdateInterval(delay);
+    Magnetometer.setUpdateInterval(delay);
 
     useEffect(() => {
         setSubscription(
-            Gyroscope.addListener(gyroscopeData => {
-                setData(gyroscopeData);
+            Magnetometer.addListener(magnetometerData => {
+                setData(magnetometerData);
             })
         );
 
@@ -30,7 +30,7 @@ export default function Gyro({delay}) {
     return (
 
         <View style={styles.container}>
-            <Text style={styles.title}>Gyroscope</Text>
+            <Text style={styles.title}>Magnetometer</Text>
             <Text>
                 X: {x.toFixed(2)}
             </Text>

@@ -13,13 +13,12 @@ export const styles = StyleSheet.create({
         color: foregroundColor1
     },
     container: {
-        flex: 0.17,
         width: '80%',
         backgroundColor: backgroundColor,
         alignItems: 'center',
         justifyContent: 'center',
         borderWidth: 1,
-        marginBottom: '3%',
+        marginBottom: '4%',
 
     },
 });
