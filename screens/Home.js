@@ -10,6 +10,7 @@ import Slider from '@react-native-community/slider';
 import MotionAccGrav from '../components/MotionAccGrav.js';
 import Rotation from '../components/Rotation.js';
 import RotationRate from '../components/RotationRate.js';
+import MagnetUnc from '../components/MagnetometerUncalibrated.js';
 
 export default function Home({ navigation }) {
 
@@ -27,9 +28,10 @@ export default function Home({ navigation }) {
     <ScrollView contentContainerStyle={styles.scrollContainer}>
 
       <Text style={styles.title}>Sensor Data</Text>
-      <Gyro delay={delay} />
       <Accelero delay={delay} />
+      <Gyro delay={delay} />
       <Magnet delay={delay} />
+      <MagnetUnc delay={delay} />
       <MotionAcc delay={delay} />
       <MotionAccGrav delay={delay} />
       <Rotation delay={delay} />

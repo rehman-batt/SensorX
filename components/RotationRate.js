@@ -6,7 +6,7 @@ import { DeviceMotion } from 'expo-sensors';
 
 export default function RotationRate({ delay }) {
 
-
+    const [dataStream, setDataStream] = useState([]);
     const [errorMsg, setErrorMsg] = useState('Please provide permission to access device motion');
     const [{ alpha, beta, gamma }, setData] = useState({
         alpha: 0,
@@ -15,21 +15,28 @@ export default function RotationRate({ delay }) {
     });
 
     const [subscription, setSubscription] = useState(null);
+    DeviceMotion.setUpdateInterval(delay);
 
     useEffect(() => {
         (async () => {
 
-            let { status } = await DeviceMotion.getPermissionsAsync();
+            let { status } = await DeviceMotion.requestPermissionsAsync();
             if (status !== 'granted') {
                 setErrorMsg('Please provide permission to access device motion');
                 return;
             }
             else {
                 setErrorMsg(null);
-                DeviceMotion.setUpdateInterval(delay);
 
                 setSubscription(
                     DeviceMotion.addListener(motionData => {
+
+                        if (dataStream.length == 50) {
+                            console.log(dataStream);
+                            setDataStream([]);
+                        }
+                        setDataStream((old) => [...old, motionData]);
+
                         setData(motionData.rotationRate);
                     })
                 );
@@ -43,7 +50,7 @@ export default function RotationRate({ delay }) {
         })();
 
     }, []);
-
+    
     return (
 
         <View style={styles.container}>

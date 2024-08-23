@@ -8,7 +8,8 @@ export default function LatLong({ updateLatLong, latitude, longitude, delay }) {
 
 
     const [errorMsg, setErrorMsg] = useState('Please provide permission to access location');
-
+    const [dataStream, setDataStream] = useState([])
+    
     useEffect(() => {
         (async () => {
 
@@ -17,13 +18,15 @@ export default function LatLong({ updateLatLong, latitude, longitude, delay }) {
                 setErrorMsg('Please provide permission to access location');
                 return;
             }
+
             else {
+                await Location.enableNetworkProviderAsync();
                 setErrorMsg(null);
+                let location = await Location.getCurrentPositionAsync({});
+
+                updateLatLong(location.coords.latitude, location.coords.longitude);
+                dataStream.push(location.coords)
             }
-
-            let location = await Location.getCurrentPositionAsync({});
-
-            updateLatLong(location.coords.latitude, location.coords.longitude);
 
         })();
 
@@ -31,9 +34,16 @@ export default function LatLong({ updateLatLong, latitude, longitude, delay }) {
     }, []);
 
     useEffect(() => {
+       
         const fn = async () => {
             let location = await Location.getCurrentPositionAsync({});
             updateLatLong(location.coords.latitude, location.coords.longitude);
+
+            if (dataStream.length == 50) {
+                console.log(dataStream);
+                setDataStream([]);
+            }
+            setDataStream((old) => [...old, location.coords]);
         }
 
         let update = setTimeout(fn, delay);

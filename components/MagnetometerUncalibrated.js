@@ -1,10 +1,9 @@
 import { Text, View } from 'react-native';
+import { MagnetometerUncalibrated } from 'expo-sensors';
 import { useState, useEffect } from 'react';
 import { styles } from '../styles/SensorStyles';
-import { DeviceMotion } from 'expo-sensors';
 
-
-export default function MotionAcc({ delay }) {
+export default function MagnetUnc({delay}) {
 
     const [dataStream, setDataStream] = useState([]);
     const [errorMsg, setErrorMsg] = useState('Please provide permission to access device motion');
@@ -14,30 +13,30 @@ export default function MotionAcc({ delay }) {
         z: 0,
     });
     const [subscription, setSubscription] = useState(null);
-    DeviceMotion.setUpdateInterval(delay);
+    MagnetometerUncalibrated.setUpdateInterval(delay);
 
     useEffect(() => {
         (async () => {
-
-            let { status } = await DeviceMotion.requestPermissionsAsync();
+            let { status } = await MagnetometerUncalibrated.requestPermissionsAsync();
             if (status !== 'granted') {
-                setErrorMsg('Please provide permission to access device motion');
+                setErrorMsg('Please provide permission to access Magnetometer');
                 return;
             }
             else {
                 setErrorMsg(null);
 
                 setSubscription(
-                    DeviceMotion.addListener(motionData => {
-                        
-                        if (dataStream.length == 50) {
-                            console.log(dataStream);
-                            setDataStream([]);
-                        }
-                        setDataStream((old) => [...old, motionData]);
+                    MagnetometerUncalibrated.addListener(
+                        (magnetometerData) => {
 
-                        setData(motionData.acceleration);
-                    })
+                            if (dataStream.length == 50) {
+                                console.log(dataStream);
+                                setDataStream([]);
+                            }
+                            setDataStream((old) => [...old, magnetometerData]);
+
+                            setData(magnetometerData);
+                        })
                 );
 
                 return () => {
@@ -45,17 +44,16 @@ export default function MotionAcc({ delay }) {
                     setSubscription(null);
                 };
             }
-
         })();
 
     }, []);
 
     return (
-
+        
         <View style={styles.container}>
             {!errorMsg &&
                 <>
-                    <Text style={styles.title}>Motion</Text>
+                    <Text style={styles.title}>MagnetometerUncalibrated</Text>
                     <Text>
                         X: {x.toFixed(2)}
                     </Text>
@@ -65,7 +63,6 @@ export default function MotionAcc({ delay }) {
                     <Text>
                         Z: {z.toFixed(2)}
                     </Text>
-
                 </>
             }
 
@@ -75,5 +72,9 @@ export default function MotionAcc({ delay }) {
 
         </View>
 
+        
+
     );
 }
+
+
