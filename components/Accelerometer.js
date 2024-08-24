@@ -1,9 +1,10 @@
-import { Text, View } from 'react-native';
+import { Text, View, Image } from 'react-native';
 import { Accelerometer } from 'expo-sensors';
 import { useState, useEffect } from 'react';
 import { styles } from '../styles/SensorStyles';
 
-export default function Accelero({ delay }) {
+
+export default function Accelero({ delay, collectData }) {
 
     const [dataStream, setDataStream] = useState([]);
     const [errorMsg, setErrorMsg] = useState('Please provide permission to access device motion');
@@ -13,29 +14,25 @@ export default function Accelero({ delay }) {
         z: 0,
     });
     const [subscription, setSubscription] = useState(null);
+    const [status, setStatus] = useState('denied');
 
     Accelerometer.setUpdateInterval(delay);
 
     useEffect(() => {
         (async () => {
 
-            let { status } = await Accelerometer.requestPermissionsAsync();
-            if (status !== 'granted') {
+            let permissionStatus = await Accelerometer.requestPermissionsAsync();
+            if (permissionStatus.status !== 'granted') {
                 setErrorMsg('Please provide permission to access Accelerometer');
                 return;
             }
             else {
+                setStatus('granted');
                 setErrorMsg(null);
 
                 setSubscription(
                     Accelerometer.addListener(
                         (accelerometerData) => {
-                            
-                            if (dataStream.length == 50) {
-                                console.log(dataStream);
-                                setDataStream([]);
-                            }
-                            setDataStream((old) => [...old, accelerometerData]);
 
                             setData(accelerometerData);
                         })
@@ -56,16 +53,46 @@ export default function Accelero({ delay }) {
         <View style={styles.container}>
             {!errorMsg &&
                 <>
-                    <Text style={styles.title}>Accelerometer</Text>
-                    <Text>
-                        X: {x.toFixed(2)}
-                    </Text>
-                    <Text>
-                        Y: {y.toFixed(2)}
-                    </Text>
-                    <Text>
-                        Z: {z.toFixed(2)}
-                    </Text>
+                    <View style={styles.titleView}>
+                        <Text style={styles.title}>Accelerometer</Text>
+                    </View>
+                    <View style={styles.subContainer}>
+                        <View style={styles.sensorImageView}>
+                            <Image
+                                style={styles.sensorImage}
+                                source={require('../assets/accelerometer-sensor.png')}
+                            />
+                        </View>
+                        <View style={styles.valueContainer}>
+                        <View>
+                                <Text style={styles.valueTitle}>x-axis</Text>
+                                <View style={styles.flexRowUtility}>
+                                    <Text style={styles.value}>
+                                        {x.toFixed(2)}
+                                    </Text>
+                                    <Text style={styles.unit}>m/s²</Text>
+                                </View>
+                            </View>
+                            <View>
+                                <Text style={styles.valueTitle}>y-axis</Text>
+                                <View style={styles.flexRowUtility}>
+                                    <Text style={styles.value}>
+                                        {y.toFixed(2)}
+                                    </Text>
+                                    <Text style={styles.unit}>m/s²</Text>
+                                </View>
+                            </View>
+                            <View>
+                                <Text style={styles.valueTitle}>z-axis</Text>
+                                <View style={styles.flexRowUtility}>
+                                    <Text style={styles.value}>
+                                        {z.toFixed(2)}
+                                    </Text>
+                                    <Text style={styles.unit}>m/s²</Text>
+                                </View>
+                            </View>
+                        </View>
+                    </View>
                 </>
             }
 

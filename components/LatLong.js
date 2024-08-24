@@ -40,7 +40,7 @@ export default function LatLong({ updateLatLong, latitude, longitude, delay }) {
             updateLatLong(location.coords.latitude, location.coords.longitude);
 
             if (dataStream.length == 50) {
-                console.log(dataStream);
+                // console.log(dataStream);
                 setDataStream([]);
             }
             setDataStream((old) => [...old, location.coords]);

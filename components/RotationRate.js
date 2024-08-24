@@ -32,12 +32,20 @@ export default function RotationRate({ delay }) {
                     DeviceMotion.addListener(motionData => {
 
                         if (dataStream.length == 50) {
-                            console.log(dataStream);
+                            // console.log(dataStream);
                             setDataStream([]);
                         }
                         setDataStream((old) => [...old, motionData]);
 
-                        setData(motionData.rotationRate);
+                        if (motionData.rotationRate) {
+                            setData(motionData.rotationRate);
+                        } else {
+                            setData({
+                                alpha: 0,
+                                beta: 0,
+                                gamma: 0,
+                            });
+                        }
                     })
                 );
 
@@ -58,13 +66,13 @@ export default function RotationRate({ delay }) {
                 <>
                     <Text style={styles.title}>Rotation Rate</Text>
                     <Text>
-                        Alpha: {alpha.toFixed(2)}
+                        Alpha: {alpha && alpha.toFixed(2)}
                     </Text>
                     <Text>
-                        Beta: {beta.toFixed(2)}
+                        Beta: {beta && beta.toFixed(2)}
                     </Text>
                     <Text>
-                        Gamma: {gamma.toFixed(2)}
+                        Gamma: {gamma && gamma.toFixed(2)}
                     </Text>
 
                 </>

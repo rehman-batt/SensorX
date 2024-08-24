@@ -30,7 +30,7 @@ export default function Magnet({delay}) {
                         (magnetometerData) => {
 
                             if (dataStream.length == 50) {
-                                console.log(dataStream);
+                                // console.log(dataStream);
                                 setDataStream([]);
                             }
                             setDataStream((old) => [...old, magnetometerData]);

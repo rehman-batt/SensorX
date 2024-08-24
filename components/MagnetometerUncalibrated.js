@@ -6,7 +6,7 @@ import { styles } from '../styles/SensorStyles';
 export default function MagnetUnc({delay}) {
 
     const [dataStream, setDataStream] = useState([]);
-    const [errorMsg, setErrorMsg] = useState('Please provide permission to access device motion');
+    const [errorMsg, setErrorMsg] = useState('Please provide permission to access Magnetometer');
     const [{ x, y, z }, setData] = useState({
         x: 0,
         y: 0,
@@ -30,7 +30,7 @@ export default function MagnetUnc({delay}) {
                         (magnetometerData) => {
 
                             if (dataStream.length == 50) {
-                                console.log(dataStream);
+                                // console.log(dataStream);
                                 setDataStream([]);
                             }
                             setDataStream((old) => [...old, magnetometerData]);

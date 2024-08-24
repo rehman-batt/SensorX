@@ -29,14 +29,20 @@ export default function MotionAcc({ delay }) {
 
                 setSubscription(
                     DeviceMotion.addListener(motionData => {
-                        
                         if (dataStream.length == 50) {
-                            console.log(dataStream);
                             setDataStream([]);
                         }
                         setDataStream((old) => [...old, motionData]);
 
-                        setData(motionData.acceleration);
+                        if (motionData.acceleration) {
+                            setData(motionData.acceleration);
+                        } else {
+                            setData({
+                                x: 0,
+                                y: 0,
+                                z: 0,
+                            });
+                        }
                     })
                 );
 
@@ -57,13 +63,13 @@ export default function MotionAcc({ delay }) {
                 <>
                     <Text style={styles.title}>Motion</Text>
                     <Text>
-                        X: {x.toFixed(2)}
+                        X: {x && x.toFixed(2)}
                     </Text>
                     <Text>
-                        Y: {y.toFixed(2)}
+                        Y: {y && y.toFixed(2)}
                     </Text>
                     <Text>
-                        Z: {z.toFixed(2)}
+                        Z: {z && z.toFixed(2)}
                     </Text>
 
                 </>

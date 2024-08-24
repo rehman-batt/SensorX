@@ -36,3 +36,5 @@ yarn-error.*
 
 # build files
 eas.json
+
+.env

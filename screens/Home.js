@@ -17,6 +17,8 @@ export default function Home({ navigation }) {
   const [latitude, setLatitude] = useState(null);
   const [longitude, setLongitude] = useState(null);
   const [delay, setDelay] = useState(200);
+  const [collectData, setCollectData] = useState(false);
+  const [user, SetUser] = useState('Abdul');
 
   function updateLatLong(lat, long) {
     setLatitude(lat);
@@ -26,9 +28,7 @@ export default function Home({ navigation }) {
   return (
 
     <ScrollView contentContainerStyle={styles.scrollContainer}>
-
-      <Text style={styles.title}>Sensor Data</Text>
-      <Accelero delay={delay} />
+      <Accelero delay={delay} collectData={collectData} />
       <Gyro delay={delay} />
       <Magnet delay={delay} />
       <MagnetUnc delay={delay} />
@@ -49,9 +49,14 @@ export default function Home({ navigation }) {
         step={50}
       />
       <Text>{delay}</Text>
-      {/* <Pressable style={styles.button} onPress={() => navigation.navigate("Map", {latitude, longitude})}>
-        <Text style={styles.text}>SHOW ON MAP</Text>
-      </Pressable> */}
+      
+      {!collectData && <Pressable style={styles.button} onPress={() => setCollectData(true)}>
+        <Text style={styles.text}>Collect Data</Text>
+      </Pressable>}
+
+      {collectData && <Pressable style={styles.button} onPress={() => setCollectData(false)}>
+        <Text style={styles.text}>Stop Collection</Text>
+      </Pressable>}
 
     </ScrollView>
 
@@ -60,10 +65,8 @@ export default function Home({ navigation }) {
 
 const styles = StyleSheet.create({
   scrollContainer: {
-    flexGrow: 1,
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: '20%',
+    paddingBottom: '3%',
   },
   title: {
     fontSize: 30,

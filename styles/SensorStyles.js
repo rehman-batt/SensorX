@@ -7,19 +7,76 @@ export const buttonForeground = 'white';
 export const foregroundColor2 = 'black';
 
 export const styles = StyleSheet.create({
+    titleView: {
+        width: '100%',
+        backgroundColor: buttonBackground,
+        height: 50,
+        justifyContent: 'center',
+        paddingLeft: '5%',
+        
+    },
     title: {
-        fontWeight: 'bold',
-        marginBottom: '3%',
-        color: foregroundColor1
+        color: buttonForeground,
+        fontSize: 20,
     },
     container: {
-        width: '80%',
+        width: '95%',
         backgroundColor: backgroundColor,
-        alignItems: 'center',
-        justifyContent: 'center',
         borderWidth: 1,
-        marginBottom: '4%',
-
+        marginTop: '4%',
+        borderRadius: 5,
+        overflow: 'hidden',
+        borderColor: 'transparent',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.8,
+        shadowRadius: 2,  
+        elevation: 5,
+        height: 300,
+        
     },
+    sensorImageView: {
+        marginTop: 'auto',
+        marginBottom: 'auto',
+        height: 140, 
+        width: 140,
+        marginHorizontal: 40,
+        borderColor: buttonBackground,
+        borderWidth: 1,
+        borderRadius: 100,
+        padding: 20,
+    },
+    sensorImage: {
+        flex: 1,
+        width: '100%'
+    },
+    subContainer: {
+        flex: 1,
+        flexDirection: 'row',
+    },
+    valueTitle: {
+        fontWeight: 'bold',
+        fontSize: 17,
+        marginBottom: 5,
+    },
+    value: {
+        borderWidth: 1,
+        alignSelf: 'flex-start',
+        paddingHorizontal: 20,
+        fontSize: 16,
+        color: foregroundColor1,
+    },
+    valueContainer: {
+        flex: 1,
+        justifyContent: 'space-around',
+    }, 
+    flexRowUtility: {
+        flexDirection: 'row',
+    },
+    unit: {
+        color: 'gray',
+        fontSize: 15,
+        marginLeft: 5,
+    }
 });
 
