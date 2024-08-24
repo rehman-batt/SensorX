@@ -33,11 +33,9 @@ export default function Accelero({ delay, collectData }) {
                 setSubscription(
                     Accelerometer.addListener(
                         (accelerometerData) => {
-
                             setData(accelerometerData);
                         })
                 );
-
                 return () => {
                     subscription && subscription.remove();
                     setSubscription(null);
