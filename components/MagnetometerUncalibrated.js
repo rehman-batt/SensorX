@@ -1,4 +1,4 @@
-import { Text, View } from 'react-native';
+import { Text, View, Image } from 'react-native';
 import { MagnetometerUncalibrated } from 'expo-sensors';
 import { useState, useEffect } from 'react';
 import { styles } from '../styles/SensorStyles';

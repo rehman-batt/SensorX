@@ -7,7 +7,7 @@ import { styles } from '../styles/SensorStyles';
 export default function Accelero({ delay, collectData }) {
 
     const [dataStream, setDataStream] = useState([]);
-    const [errorMsg, setErrorMsg] = useState('Please provide permission to access device motion');
+    const [errorMsg, setErrorMsg] = useState('Please provide permission to access Accelerometer');
     const [{ x, y, z }, setData] = useState({
         x: 0,
         y: 0,
@@ -62,7 +62,7 @@ export default function Accelero({ delay, collectData }) {
                             />
                         </View>
                         <View style={styles.valueContainer}>
-                        <View>
+                            <View>
                                 <Text style={styles.valueTitle}>x-axis</Text>
                                 <View style={styles.flexRowUtility}>
                                     <Text style={styles.value}>

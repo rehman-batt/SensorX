@@ -21,7 +21,7 @@ export default function Gyro({ delay, collectData }) {
         (async () => {
             let { status } = await Gyroscope.requestPermissionsAsync();
             if (status !== 'granted') {
-                setErrorMsg('Please provide permission to access device motion');
+                setErrorMsg('Please provide permission to access Gyroscope');
                 return;
             }
             else {
@@ -58,7 +58,7 @@ export default function Gyro({ delay, collectData }) {
                             />
                         </View>
                         <View style={styles.valueContainer}>
-                        <View>
+                            <View>
                                 <Text style={styles.valueTitle}>x-axis</Text>
                                 <View style={styles.flexRowUtility}>
                                     <Text style={styles.value}>
