@@ -3,7 +3,7 @@ import { MagnetometerUncalibrated } from 'expo-sensors';
 import { useState, useEffect } from 'react';
 import { styles } from '../styles/SensorStyles';
 
-export default function MagnetUnc({delay}) {
+export default function MagnetUnc({ delay }) {
 
     const [dataStream, setDataStream] = useState([]);
     const [errorMsg, setErrorMsg] = useState('Please provide permission to access Magnetometer');
@@ -13,6 +13,7 @@ export default function MagnetUnc({delay}) {
         z: 0,
     });
     const [subscription, setSubscription] = useState(null);
+    const [status, setStatus] = useState('denied');
     MagnetometerUncalibrated.setUpdateInterval(delay);
 
     useEffect(() => {
@@ -23,18 +24,12 @@ export default function MagnetUnc({delay}) {
                 return;
             }
             else {
+                setStatus('granted');
                 setErrorMsg(null);
 
                 setSubscription(
                     MagnetometerUncalibrated.addListener(
                         (magnetometerData) => {
-
-                            if (dataStream.length == 50) {
-                                // console.log(dataStream);
-                                setDataStream([]);
-                            }
-                            setDataStream((old) => [...old, magnetometerData]);
-
                             setData(magnetometerData);
                         })
                 );
@@ -49,20 +44,50 @@ export default function MagnetUnc({delay}) {
     }, []);
 
     return (
-        
+
         <View style={styles.container}>
             {!errorMsg &&
                 <>
-                    <Text style={styles.title}>MagnetometerUncalibrated</Text>
-                    <Text>
-                        X: {x.toFixed(2)}
-                    </Text>
-                    <Text>
-                        Y: {y.toFixed(2)}
-                    </Text>
-                    <Text>
-                        Z: {z.toFixed(2)}
-                    </Text>
+                    <View style={styles.titleView}>
+                        <Text style={styles.title}>Magnetometer (Uncalibrated)</Text>
+                    </View>
+                    <View style={styles.subContainer}>
+                        <View style={styles.sensorImageView}>
+                            <Image
+                                style={styles.sensorImage}
+                                source={require('../assets/magnatometer-unc-sensor.png')}
+                            />
+                        </View>
+                        <View style={styles.valueContainer}>
+                            <View>
+                                <Text style={styles.valueTitle}>x-axis</Text>
+                                <View style={styles.flexRowUtility}>
+                                    <Text style={styles.value}>
+                                        {x.toFixed(2)}
+                                    </Text>
+                                    <Text style={styles.unit}>m/s²</Text>
+                                </View>
+                            </View>
+                            <View>
+                                <Text style={styles.valueTitle}>y-axis</Text>
+                                <View style={styles.flexRowUtility}>
+                                    <Text style={styles.value}>
+                                        {y.toFixed(2)}
+                                    </Text>
+                                    <Text style={styles.unit}>m/s²</Text>
+                                </View>
+                            </View>
+                            <View>
+                                <Text style={styles.valueTitle}>z-axis</Text>
+                                <View style={styles.flexRowUtility}>
+                                    <Text style={styles.value}>
+                                        {z.toFixed(2)}
+                                    </Text>
+                                    <Text style={styles.unit}>m/s²</Text>
+                                </View>
+                            </View>
+                        </View>
+                    </View>
                 </>
             }
 
@@ -72,7 +97,7 @@ export default function MagnetUnc({delay}) {
 
         </View>
 
-        
+
 
     );
 }
