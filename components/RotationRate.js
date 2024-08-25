@@ -58,11 +58,11 @@ export default function RotationRate({ delay, collectData }) {
     return (
 
         <View style={styles.container}>
+            <View style={styles.titleView}>
+                <Text style={styles.title}>Rotation Rate</Text>
+            </View>
             {!errorMsg &&
                 <>
-                    <View style={styles.titleView}>
-                        <Text style={styles.title}>Rotation Rate</Text>
-                    </View>
                     <View style={styles.subContainer}>
                         <View style={styles.sensorImageView}>
                             <Image

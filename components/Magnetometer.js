@@ -46,11 +46,11 @@ export default function Magnet({ delay, collectData }) {
     return (
 
         <View style={styles.container}>
+            <View style={styles.titleView}>
+                <Text style={styles.title}>Magnetometer</Text>
+            </View>
             {!errorMsg &&
                 <>
-                    <View style={styles.titleView}>
-                        <Text style={styles.title}>Magnetometer</Text>
-                    </View>
                     <View style={styles.subContainer}>
                         <View style={styles.sensorImageView}>
                             <Image

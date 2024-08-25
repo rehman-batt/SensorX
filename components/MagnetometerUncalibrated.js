@@ -46,11 +46,11 @@ export default function MagnetUnc({ delay, collectData }) {
     return (
 
         <View style={styles.container}>
+            <View style={styles.titleView}>
+                <Text style={styles.title}>Magnetometer (Uncalibrated)</Text>
+            </View>
             {!errorMsg &&
                 <>
-                    <View style={styles.titleView}>
-                        <Text style={styles.title}>Magnetometer (Uncalibrated)</Text>
-                    </View>
                     <View style={styles.subContainer}>
                         <View style={styles.sensorImageView}>
                             <Image

@@ -49,11 +49,11 @@ export default function Accelero({ delay, collectData }) {
     return (
 
         <View style={styles.container}>
+            <View style={styles.titleView}>
+                <Text style={styles.title}>Accelerometer</Text>
+            </View>
             {!errorMsg &&
                 <>
-                    <View style={styles.titleView}>
-                        <Text style={styles.title}>Accelerometer</Text>
-                    </View>
                     <View style={styles.subContainer}>
                         <View style={styles.sensorImageView}>
                             <Image

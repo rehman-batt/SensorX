@@ -56,11 +56,11 @@ export default function MotionAcc({ delay, collectData }) {
     return (
 
         <View style={styles.container}>
+            <View style={styles.titleView}>
+                <Text style={styles.title}>Acceleration</Text>
+            </View>
             {!errorMsg &&
                 <>
-                    <View style={styles.titleView}>
-                        <Text style={styles.title}>Acceleration</Text>
-                    </View>
                     <View style={styles.subContainer}>
                         <View style={styles.sensorImageView}>
                             <Image
