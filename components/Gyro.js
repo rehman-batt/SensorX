@@ -19,8 +19,8 @@ export default function Gyro({ delay, collectData }) {
 
     useEffect(() => {
         (async () => {
-            let { status } = await Gyroscope.requestPermissionsAsync();
-            if (status !== 'granted') {
+            let { permissionStatus } = await Gyroscope.requestPermissionsAsync();
+            if (permissionStatus !== 'granted') {
                 setErrorMsg('Please provide permission to access Gyroscope');
                 return;
             }
@@ -91,7 +91,10 @@ export default function Gyro({ delay, collectData }) {
             }
 
             {
-                errorMsg && <Text>{errorMsg}</Text>
+                errorMsg &&
+                <View style={styles.errorView}>
+                    <Text>{errorMsg}</Text>
+                </View>
             }
 
         </View>

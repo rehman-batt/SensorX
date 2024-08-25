@@ -95,7 +95,10 @@ export default function Accelero({ delay, collectData }) {
             }
 
             {
-                errorMsg && <Text>{errorMsg}</Text>
+                errorMsg &&
+                <View style={styles.errorView}>
+                    <Text>{errorMsg}</Text>
+                </View>
             }
 
         </View>

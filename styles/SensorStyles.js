@@ -77,6 +77,11 @@ export const styles = StyleSheet.create({
         color: 'gray',
         fontSize: 15,
         marginLeft: 5,
+    },
+    errorView: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
     }
 });
 

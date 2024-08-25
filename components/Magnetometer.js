@@ -3,7 +3,7 @@ import { Magnetometer } from 'expo-sensors';
 import { useState, useEffect } from 'react';
 import { styles } from '../styles/SensorStyles';
 
-export default function Magnet({ delay }) {
+export default function Magnet({ delay, collectData }) {
 
     const [dataStream, setDataStream] = useState([]);
     const [errorMsg, setErrorMsg] = useState('Please provide permission to access Magnetometer');
@@ -18,8 +18,8 @@ export default function Magnet({ delay }) {
 
     useEffect(() => {
         (async () => {
-            let { status } = await Magnetometer.requestPermissionsAsync();
-            if (status !== 'granted') {
+            let { permissionStatus } = await Magnetometer.requestPermissionsAsync();
+            if (permissionStatus !== 'granted') {
                 setErrorMsg('Please provide permission to access Magnetometer');
                 return;
             }
@@ -92,7 +92,10 @@ export default function Magnet({ delay }) {
             }
 
             {
-                errorMsg && <Text>{errorMsg}</Text>
+                errorMsg &&
+                <View style={styles.errorView}>
+                    <Text>{errorMsg}</Text>
+                </View>
             }
 
         </View>

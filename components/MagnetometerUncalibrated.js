@@ -3,7 +3,7 @@ import { MagnetometerUncalibrated } from 'expo-sensors';
 import { useState, useEffect } from 'react';
 import { styles } from '../styles/SensorStyles';
 
-export default function MagnetUnc({ delay }) {
+export default function MagnetUnc({ delay, collectData }) {
 
     const [dataStream, setDataStream] = useState([]);
     const [errorMsg, setErrorMsg] = useState('Please provide permission to access Magnetometer');
@@ -18,8 +18,8 @@ export default function MagnetUnc({ delay }) {
 
     useEffect(() => {
         (async () => {
-            let { status } = await MagnetometerUncalibrated.requestPermissionsAsync();
-            if (status !== 'granted') {
+            let { permissionStatus } = await MagnetometerUncalibrated.requestPermissionsAsync();
+            if (permissionStatus !== 'granted') {
                 setErrorMsg('Please provide permission to access Magnetometer');
                 return;
             }
@@ -92,7 +92,10 @@ export default function MagnetUnc({ delay }) {
             }
 
             {
-                errorMsg && <Text>{errorMsg}</Text>
+                errorMsg &&
+                <View style={styles.errorView}>
+                    <Text>{errorMsg}</Text>
+                </View>
             }
 
         </View>

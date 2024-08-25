@@ -1,4 +1,4 @@
-import { Text, View } from 'react-native';
+import { Text, View, Image } from 'react-native';
 import { useState, useEffect } from 'react';
 import { styles } from '../styles/SensorStyles';
 import * as Location from 'expo-location';
@@ -6,26 +6,26 @@ import * as Location from 'expo-location';
 
 export default function LatLong({ updateLatLong, latitude, longitude, delay }) {
 
-
     const [errorMsg, setErrorMsg] = useState('Please provide permission to access location');
-    const [dataStream, setDataStream] = useState([])
-    
+    const [dataStream, setDataStream] = useState([]);
+    const [status, setStatus] = useState('denied');
+
     useEffect(() => {
         (async () => {
 
-            let { status } = await Location.requestForegroundPermissionsAsync();
-            if (status !== 'granted') {
+            let { permissionStatus } = await Location.requestForegroundPermissionsAsync();
+            if (permissionStatus !== 'granted') {
                 setErrorMsg('Please provide permission to access location');
                 return;
             }
 
             else {
+                setStatus('granted');
                 await Location.enableNetworkProviderAsync();
                 setErrorMsg(null);
                 let location = await Location.getCurrentPositionAsync({});
 
                 updateLatLong(location.coords.latitude, location.coords.longitude);
-                dataStream.push(location.coords)
             }
 
         })();
@@ -34,16 +34,10 @@ export default function LatLong({ updateLatLong, latitude, longitude, delay }) {
     }, []);
 
     useEffect(() => {
-       
+
         const fn = async () => {
             let location = await Location.getCurrentPositionAsync({});
             updateLatLong(location.coords.latitude, location.coords.longitude);
-
-            if (dataStream.length == 50) {
-                // console.log(dataStream);
-                setDataStream([]);
-            }
-            setDataStream((old) => [...old, location.coords]);
         }
 
         let update = setTimeout(fn, delay);
@@ -58,19 +52,46 @@ export default function LatLong({ updateLatLong, latitude, longitude, delay }) {
         <View style={styles.container}>
             {!errorMsg &&
                 <>
-                    <Text style={styles.title}>LatLong</Text>
-                    <Text>
-                        Lat: {latitude}
-                    </Text>
-                    <Text>
-                        Long: {longitude}
-                    </Text>
-
+                    <View style={styles.titleView}>
+                        <Text style={styles.title}>Latitude Longitude</Text>
+                    </View>
+                    <View style={styles.subContainer}>
+                        <View style={styles.sensorImageView}>
+                            <Image
+                                style={styles.sensorImage}
+                                source={require('../assets/gyroscope-sensor.png')}
+                            />
+                        </View>
+                        <View style={styles.valueContainer}>
+                            <View>
+                                <Text style={styles.valueTitle}>Latitude</Text>
+                                <View style={styles.flexRowUtility}>
+                                    <Text style={styles.value}>
+                                        {latitude}
+                                    </Text>
+                                    <Text style={styles.unit}>deg</Text>
+                                </View>
+                            </View>
+                            <View>
+                                <Text style={styles.valueTitle}>Longitude</Text>
+                                <View style={styles.flexRowUtility}>
+                                    <Text style={styles.value}>
+                                        {longitude}
+                                    </Text>
+                                    <Text style={styles.unit}>deg</Text>
+                                </View>
+                            </View>
+                        </View>
+                    </View>
                 </>
             }
 
             {
-                errorMsg && <Text>{errorMsg}</Text>
+                errorMsg &&
+                <View style={styles.errorView}>
+                    <Text>{errorMsg}</Text>
+                </View>
+                
             }
 
         </View>
