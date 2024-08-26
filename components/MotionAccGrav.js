@@ -20,8 +20,8 @@ export default function MotionAccGrav({ delay, collectData }) {
     useEffect(() => {
         (async () => {
 
-            let { permissionStatus } = await DeviceMotion.requestPermissionsAsync();
-            if (permissionStatus !== 'granted') {
+            let permissionStatus = await DeviceMotion.requestPermissionsAsync();
+            if (permissionStatus.status !== 'granted') {
                 setErrorMsg('Please provide permission to access device motion');
                 return;
             }

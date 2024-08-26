@@ -13,8 +13,8 @@ export default function LatLong({ updateLatLong, latitude, longitude, delay }) {
     useEffect(() => {
         (async () => {
 
-            let { permissionStatus } = await Location.requestForegroundPermissionsAsync();
-            if (permissionStatus !== 'granted') {
+            let permissionStatus = await Location.requestForegroundPermissionsAsync();
+            if (permissionStatus.status !== 'granted') {
                 setErrorMsg('Please provide permission to access location');
                 return;
             }

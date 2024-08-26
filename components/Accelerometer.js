@@ -3,7 +3,6 @@ import { Accelerometer } from 'expo-sensors';
 import { useState, useEffect } from 'react';
 import { styles } from '../styles/SensorStyles';
 
-
 export default function Accelero({ delay, collectData }) {
 
     const [dataStream, setDataStream] = useState([]);

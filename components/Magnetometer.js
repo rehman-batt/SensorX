@@ -18,8 +18,8 @@ export default function Magnet({ delay, collectData }) {
 
     useEffect(() => {
         (async () => {
-            let { permissionStatus } = await Magnetometer.requestPermissionsAsync();
-            if (permissionStatus !== 'granted') {
+            let permissionStatus = await Magnetometer.requestPermissionsAsync();
+            if (permissionStatus.status !== 'granted') {
                 setErrorMsg('Please provide permission to access Magnetometer');
                 return;
             }
