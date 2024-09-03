@@ -67,7 +67,7 @@ export default function Rotation({ delay, collectData}) {
                         <View style={styles.sensorImageView}>
                             <Image
                                 style={styles.sensorImage}
-                                source={require('../assets/acceleration-6.png')}
+                                source={require('../assets/rotation.png')}
                             />
                         </View>
                         <View style={styles.valueContainer}>

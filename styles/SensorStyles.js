@@ -66,6 +66,13 @@ export const styles = StyleSheet.create({
         fontSize: 16,
         color: foregroundColor1,
     },
+    latLongValue: {
+        borderWidth: 1,
+        alignSelf: 'flex-start',
+        paddingHorizontal: 10,
+        fontSize: 13,
+        color: foregroundColor1,
+    },
     valueContainer: {
         flex: 1,
         justifyContent: 'space-around',

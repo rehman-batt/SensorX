@@ -59,14 +59,14 @@ export default function LatLong({ updateLatLong, latitude, longitude, delay }) {
                         <View style={styles.sensorImageView}>
                             <Image
                                 style={styles.sensorImage}
-                                source={require('../assets/gyroscope-sensor.png')}
+                                source={require('../assets/gps.png')}
                             />
                         </View>
                         <View style={styles.valueContainer}>
                             <View>
                                 <Text style={styles.valueTitle}>Latitude</Text>
                                 <View style={styles.flexRowUtility}>
-                                    <Text style={styles.value}>
+                                    <Text style={styles.latLongValue}>
                                         {latitude}
                                     </Text>
                                     <Text style={styles.unit}>deg</Text>
@@ -75,7 +75,7 @@ export default function LatLong({ updateLatLong, latitude, longitude, delay }) {
                             <View>
                                 <Text style={styles.valueTitle}>Longitude</Text>
                                 <View style={styles.flexRowUtility}>
-                                    <Text style={styles.value}>
+                                    <Text style={styles.latLongValue}>
                                         {longitude}
                                     </Text>
                                     <Text style={styles.unit}>deg</Text>
