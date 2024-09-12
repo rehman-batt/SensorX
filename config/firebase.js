@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
+import { getAuth } from "firebase/auth";
 import {API_KEY} from 'react-native-dotenv';
 import {authDomain} from 'react-native-dotenv';
 import {projectId} from 'react-native-dotenv';
@@ -24,5 +24,6 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+export const FIREBASE_APP = initializeApp(firebaseConfig);
+export const FIREBASE_AUTH = initializeApp(FIREBASE_APP);
+
