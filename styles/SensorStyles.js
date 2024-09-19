@@ -27,7 +27,7 @@ export const styles = StyleSheet.create({
         borderRadius: 5,
         overflow: 'hidden',
         borderColor: 'transparent',
-        shadowColor: '#000',
+        shadowColor: foregroundColor2,
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.8,
         shadowRadius: 2,  

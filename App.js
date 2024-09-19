@@ -6,22 +6,33 @@ import { foregroundColor1, buttonForeground, backgroundColor } from './styles/Se
 // import { Pressable } from 'react-native';
 import Home from './screens/Home';
 import UC from './screens/UnderConstruction';
+import Settings from './screens/Settings';
 import Viz from './screens/Viz';
 import Login from './screens/Login';
 import Signup from './screens/Signup';
 // import MapScreen from './screens/Map'
 // import Icon from 'react-native-vector-icons/Entypo';
 import { StatusBar } from 'react-native';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { onAuthStateChanged } from 'firebase/auth';
+import { FIREBASE_AUTH } from './config/firebase';
 
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
 
 export default function App() {
   const [user, SetUser] = useState(null);
-  if (user ) {
-    return (
 
+  useEffect(() => {
+    onAuthStateChanged(FIREBASE_AUTH, (user) => {
+      SetUser(user);
+    })
+  }, []);
+  
+
+  if (user) {
+    return (
+      
       <>
         {/* <NavigationContainer>
         <Stack.Navigator>
@@ -59,7 +70,7 @@ export default function App() {
             <Drawer.Screen name="Data Collection" component={Home} />
             <Drawer.Screen name="Data Visualization" component={Viz} />
             <Drawer.Screen name="Dashboard" component={UC} />
-            <Drawer.Screen name="Settings" component={UC} />
+            <Drawer.Screen name="Settings" component={Settings} />
           </Drawer.Navigator>
         </NavigationContainer>
       </>
