@@ -38,3 +38,5 @@ yarn-error.*
 eas.json
 
 .env
+
+google-services.json
