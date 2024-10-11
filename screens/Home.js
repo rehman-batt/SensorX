@@ -1,64 +1,195 @@
-import { StyleSheet, View, Text, Pressable, ScrollView } from 'react-native';
-import { buttonBackground, buttonForeground, foregroundColor1 } from '../styles/SensorStyles.js';
-import { useState } from 'react';
+import { StyleSheet, View, Text, Pressable, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import { backgroundColor, buttonBackground, buttonForeground, foregroundColor1 } from '../styles/SensorStyles.js';
+import { useState, useEffect, useRef } from 'react';
 import Gyro from '../components/Gyro.js';
 import Accelero from '../components/Accelerometer.js';
 import LatLong from '../components/LatLong.js';
 import Magnet from '../components/Magnetometer.js';
 import MotionAcc from '../components/MotionAcc.js';
-import Slider from '@react-native-community/slider';
 import MotionAccGrav from '../components/MotionAccGrav.js';
 import Rotation from '../components/Rotation.js';
 import RotationRate from '../components/RotationRate.js';
 import MagnetUnc from '../components/MagnetometerUncalibrated.js';
+import { useDrawerStatus } from '@react-navigation/drawer';
+import { FIREBASE_AUTH, db } from '../config/firebase.js';
+import { set, ref, onValue, push } from 'firebase/database';
+import MobileCam from '../components/MobileCam.js';
+import Draggable from 'react-native-draggable';
 
-export default function Home({ navigation }) {
 
-  const [latitude, setLatitude] = useState(null);
-  const [longitude, setLongitude] = useState(null);
-  const [delay, setDelay] = useState(200);
+
+export default function Home({ navigation, route }) {
+
   const [collectData, setCollectData] = useState(false);
-  const [user, SetUser] = useState('Abdul');
+  const [setCamera, setSetCamera] = useState(false);
+  const [delay, setDelay] = useState(200);
+  const [loading, setLoading] = useState(false);
 
-  function updateLatLong(lat, long) {
-    setLatitude(lat);
-    setLongitude(long);
-  }
+  const acceleroData = useRef({ x: [], y: [], z: [], timestamp: [] });
+  const gyroData = useRef({ x: [], y: [], z: [], timestamp: [] });
+  const magnetData = useRef({ x: [], y: [], z: [], timestamp: [] });
+  const magnetUncData = useRef({ x: [], y: [], z: [], timestamp: [] });
+  const motionAccData = useRef({ x: [], y: [], z: [], timestamp: [] });
+  const motionAccGravData = useRef({ x: [], y: [], z: [], timestamp: [] });
+  const rotationData = useRef({ alpha: [], beta: [], gamma: [], timestamp: [] });
+  const rotationRateData = useRef({ alpha: [], beta: [], gamma: [], timestamp: [] });
+  const latLongData = useRef({ lat: [], long: [], timestamp: [] });
+
+  const getSampleRate = async () => {
+
+    const userID = FIREBASE_AUTH.currentUser?.uid;
+    if (userID) {
+      try {
+        setLoading(true);
+        const userRef = ref(db, 'users/' + userID);
+
+        onValue(userRef, (snapshot) => {
+          if (snapshot.exists()) {
+            const userData = snapshot.val();
+            setDelay(userData.sampleRate || 200);
+          } else {
+            console.log("No user data found");
+          }
+        })
+
+      } catch (error) {
+        console.log("Error fetching user data: ", error);
+        Alert.alert('Data Fetching Error', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+
+
+  const isDrawerOpen = useDrawerStatus() === 'open';
+
+  useEffect(() => {
+    getSampleRate();
+  }, [isDrawerOpen]);
+
+
+  const setSensorData = async () => {
+    try {
+      setLoading(true);
+      const dataToPush = {
+        'Accelerometer': acceleroData.current,
+        'Gyroscope': gyroData.current,
+        'Magnetometer': magnetData.current,
+        'Magnetometer Uncertainty': magnetUncData.current,
+        'Motion Acceleration': motionAccData.current,
+        'Motion Acceleration with Gravity': motionAccGravData.current,
+        'Rotation': rotationData.current,
+        'Rotation Rate': rotationRateData.current,
+        'Latitude and Longitude': latLongData.current
+      }
+
+      const userID = FIREBASE_AUTH.currentUser?.uid;
+
+      if (userID) {
+
+        const userRef = ref(db, `users/${userID}/rides`);
+
+        await push(userRef, dataToPush);
+
+      }
+    } catch (error) {
+      console.log("Error Setting Data: ", error);
+      Alert.alert('Data Setting Error', error);
+    } finally {
+
+      setLoading(false);
+
+    }
+  };
+
+  const handleDataCollection = async () => {
+
+
+    await setSensorData();
+
+    acceleroData.current = { x: [], y: [], z: [], timestamp: [] };
+    gyroData.current = { x: [], y: [], z: [], timestamp: [] };
+    magnetData.current = { x: [], y: [], z: [], timestamp: [] };
+    magnetUncData.current = { x: [], y: [], z: [], timestamp: [] };
+    motionAccData.current = { x: [], y: [], z: [], timestamp: [] };
+    motionAccGravData.current = { x: [], y: [], z: [], timestamp: [] };
+    rotationData.current = { alpha: [], beta: [], gamma: [], timestamp: [] };
+    rotationRateData.current = { alpha: [], beta: [], gamma: [], timestamp: [] };
+    latLongData.current = { lat: [], long: [], timestamp: [] };
+
+  };
+
+  useEffect(() => {
+    if (!collectData) {
+      if (
+        acceleroData.current['x'].length ||
+        gyroData.current['x'].length ||
+        magnetData.current['x'].length ||
+        magnetUncData.current['x'].length ||
+        motionAccData.current['x'].length ||
+        motionAccGravData.current['x'].length ||
+        rotationData.current['alpha'].length ||
+        rotationRateData.current['alpha'].length ||
+        latLongData.current['lat'].length
+      ) {
+
+        handleDataCollection();
+      }
+    }
+  }, [collectData]);
+
+
 
   return (
+    <>
+      {!loading &&
 
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <Accelero delay={delay} collectData={collectData} />
-      <Gyro delay={delay} />
-      <Magnet delay={delay} />
-      <MagnetUnc delay={delay} />
-      <MotionAcc delay={delay} />
-      <MotionAccGrav delay={delay} />
-      <Rotation delay={delay} />
-      <RotationRate delay={delay} />
-      <LatLong latitude={latitude} longitude={longitude} updateLatLong={updateLatLong} delay={delay} />
-      <Slider
-        style={{ width: '75%', height: 40 }}
-        minimumValue={100}
-        maximumValue={1000}
-        minimumTrackTintColor={foregroundColor1}
-        maximumTrackTintColor="#000000"
-        thumbTintColor={foregroundColor1}
-        value={200}
-        onValueChange={(curr) => { setDelay(curr) }}
-        step={50}
-      />
-      <Text>{delay}</Text>
-      
-      {!collectData && <Pressable style={styles.button} onPress={() => setCollectData(true)}>
-        <Text style={styles.text}>Collect Data</Text>
-      </Pressable>}
+        <>
+          <ScrollView contentContainerStyle={styles.scrollContainer}>
 
-      {collectData && <Pressable style={styles.button} onPress={() => setCollectData(false)}>
-        <Text style={styles.text}>Stop Collection</Text>
-      </Pressable>}
+            <Accelero delay={delay} collectData={collectData} data={acceleroData} />
+            <Gyro delay={delay} collectData={collectData} data={gyroData} />
+            <Magnet delay={delay} collectData={collectData} data={magnetData} />
+            <MagnetUnc delay={delay} collectData={collectData} data={magnetUncData} />
+            <MotionAcc delay={delay} collectData={collectData} data={motionAccData} />
+            <MotionAccGrav delay={delay} collectData={collectData} data={motionAccGravData} />
+            <Rotation delay={delay} collectData={collectData} data={rotationData} />
+            <RotationRate delay={delay} collectData={collectData} data={rotationRateData} />
+            <LatLong delay={delay} collectData={collectData} data={latLongData} />
 
-    </ScrollView>
+            {(!setCamera && !collectData) && <Pressable style={styles.button} onPress={() => setSetCamera(true)}>
+              <Text style={styles.text}>Set Camera</Text>
+            </Pressable>}
+
+            {(!collectData && setCamera) && <Pressable style={styles.button} onPress={() => setCollectData(true)}>
+              <Text style={styles.text}>Collect Data</Text>
+            </Pressable>}
+
+            {(collectData && setCamera) && <Pressable style={styles.button} onPress={() => { setCollectData(false); setSetCamera(false) }}>
+              <Text style={styles.text}>Stop Collection</Text>
+            </Pressable>}
+
+          </ScrollView>
+
+          {setCamera && <View style={styles.cameraContainer}>
+            <MobileCam collectData={collectData} />
+          </View>}
+
+          
+
+
+        </>
+
+      }
+
+      {loading && <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+
+        <ActivityIndicator color={foregroundColor1} size={60} />
+      </View>}
+
+    </>
 
   );
 }
@@ -92,4 +223,12 @@ const styles = StyleSheet.create({
     letterSpacing: 0.25,
     color: buttonForeground,
   },
+  cameraContainer: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    width: '30%',
+    height: 200,
+    backgroundColor: 'transparent',
+  }
 });

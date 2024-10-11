@@ -1,114 +1,103 @@
 import { Text, View, Image } from 'react-native';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { styles } from '../styles/SensorStyles';
 import { DeviceMotion } from 'expo-sensors';
+import { useFocusEffect } from '@react-navigation/native';
 
-
-export default function MotionAcc({ delay, collectData }) {
-
-    const [dataStream, setDataStream] = useState([]);
+export default function MotionAcc({ delay, collectData, data }) {
+    const [status, setStatus] = useState(false);
     const [errorMsg, setErrorMsg] = useState('Please provide permission to access device motion');
-    const [{ x, y, z }, setData] = useState({
-        x: 0,
-        y: 0,
-        z: 0,
-    });
-    const [subscription, setSubscription] = useState(null);
-    const [status, setStatus] = useState('denied');
+    const [{ x, y, z }, setData] = useState({ x: 0, y: 0, z: 0 });
+    const subscription = useRef(null);
+
+    if (collectData && status) {
+        data.current['x'].push(x);
+        data.current['y'].push(y);
+        data.current['z'].push(z);
+        data.current['timestamp'].push(Date.now());
+    }
+
     DeviceMotion.setUpdateInterval(delay);
 
-    useEffect(() => {
-        (async () => {
+    useFocusEffect(
+        React.useCallback(() => {
+            let isActive = true;
 
-            let permissionStatus = await DeviceMotion.requestPermissionsAsync();
-            if (permissionStatus.status !== 'granted') {
-                setErrorMsg('Please provide permission to access device motion');
-                return;
-            }
-            else {
-                setStatus('granted');
-                setErrorMsg(null);
+            (async () => {
+                let permissionStatus = await DeviceMotion.requestPermissionsAsync();
+                if (permissionStatus.status !== 'granted') {
+                    setErrorMsg('Please provide permission to access device motion');
+                    return;
+                } else {
+                    setStatus(true);
+                    setErrorMsg(null);
 
-                setSubscription(
-                    DeviceMotion.addListener(motionData => {
-                        if (motionData.acceleration) {
+                    subscription.current = DeviceMotion.addListener(motionData => {
+                        if (isActive && motionData.acceleration) {
                             setData(motionData.acceleration);
                         } else {
-                            setData({
-                                x: 0,
-                                y: 0,
-                                z: 0,
-                            });
+                            setData({ x: 0, y: 0, z: 0 });
                         }
-                    })
-                );
+                    });
+                }
+            })();
 
-                return () => {
-                    subscription && subscription.remove();
-                    setSubscription(null);
-                };
-            }
 
-        })();
+            return () => {
+                isActive = false;
+                if (subscription.current) {
+                    console.log('Motion Acceleration listener removed');
+                    subscription.current.remove();
+                    subscription.current = null;
+                }
+            };
+        }, [delay, collectData, status])
+    );
 
-    }, []);
+
 
     return (
-
         <View style={styles.container}>
             <View style={styles.titleView}>
                 <Text style={styles.title}>Acceleration</Text>
             </View>
-            {!errorMsg &&
-                <>
-                    <View style={styles.subContainer}>
-                        <View style={styles.sensorImageView}>
-                            <Image
-                                style={styles.sensorImage}
-                                source={require('../assets/acceleration.png')}
-                            />
+            {!errorMsg ? (
+                <View style={styles.subContainer}>
+                    <View style={styles.sensorImageView}>
+                        <Image
+                            style={styles.sensorImage}
+                            source={require('../assets/acceleration.png')}
+                        />
+                    </View>
+                    <View style={styles.valueContainer}>
+                        <View>
+                            <Text style={styles.valueTitle}>x-axis</Text>
+                            <View style={styles.flexRowUtility}>
+                                <Text style={styles.value}>{x.toFixed(2)}</Text>
+                                <Text style={styles.unit}>m/s²</Text>
+                            </View>
                         </View>
-                        <View style={styles.valueContainer}>
-                            <View>
-                                <Text style={styles.valueTitle}>x-axis</Text>
-                                <View style={styles.flexRowUtility}>
-                                    <Text style={styles.value}>
-                                        {x.toFixed(2)}
-                                    </Text>
-                                    <Text style={styles.unit}>m/s²</Text>
-                                </View>
+                        <View>
+                            <Text style={styles.valueTitle}>y-axis</Text>
+                            <View style={styles.flexRowUtility}>
+                                <Text style={styles.value}>{y.toFixed(2)}</Text>
+                                <Text style={styles.unit}>m/s²</Text>
                             </View>
-                            <View>
-                                <Text style={styles.valueTitle}>y-axis</Text>
-                                <View style={styles.flexRowUtility}>
-                                    <Text style={styles.value}>
-                                        {y.toFixed(2)}
-                                    </Text>
-                                    <Text style={styles.unit}>m/s²</Text>
-                                </View>
-                            </View>
-                            <View>
-                                <Text style={styles.valueTitle}>z-axis</Text>
-                                <View style={styles.flexRowUtility}>
-                                    <Text style={styles.value}>
-                                        {z.toFixed(2)}
-                                    </Text>
-                                    <Text style={styles.unit}>m/s²</Text>
-                                </View>
+                        </View>
+                        <View>
+                            <Text style={styles.valueTitle}>z-axis</Text>
+                            <View style={styles.flexRowUtility}>
+                                <Text style={styles.value}>{z.toFixed(2)}</Text>
+                                <Text style={styles.unit}>m/s²</Text>
                             </View>
                         </View>
                     </View>
-                </>
-            }
-
-            {
-                errorMsg &&
+                </View>
+            ) : (
                 <View style={styles.errorView}>
                     <Text>{errorMsg}</Text>
                 </View>
-            }
-
+            )}
         </View>
-
     );
 }

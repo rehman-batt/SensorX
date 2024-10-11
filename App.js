@@ -23,6 +23,7 @@ const Drawer = createDrawerNavigator();
 export default function App() {
   const [user, SetUser] = useState(null);
 
+
   useEffect(() => {
     onAuthStateChanged(FIREBASE_AUTH, (user) => {
       SetUser(user);

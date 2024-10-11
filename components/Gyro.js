@@ -1,54 +1,63 @@
 import { Text, View, Image } from 'react-native';
 import { Gyroscope } from 'expo-sensors';
-import { useState, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { styles } from '../styles/SensorStyles';
 
-export default function Gyro({ delay, collectData }) {
+export default function Gyro({ delay, collectData, data }) {
 
-    const [dataStream, setDataStream] = useState([]);
+    const [status, setStatus] = useState(false);
     const [errorMsg, setErrorMsg] = useState('Please provide permission to access Gyroscope');
-    const [{ x, y, z }, setData] = useState({
-        x: 0,
-        y: 0,
-        z: 0,
-    });
-    const [subscription, setSubscription] = useState(null);
-    const [status, setStatus] = useState('denied');
+    const [{ x, y, z }, setData] = useState({ x: 0, y: 0, z: 0 });
+    const subscription = useRef(null);
+
+    if (collectData && status) {
+        data.current['x'].push(x);
+        data.current['y'].push(y);
+        data.current['z'].push(z);
+        data.current['timestamp'].push(Date.now());
+    }
 
     Gyroscope.setUpdateInterval(delay);
 
-    useEffect(() => {
-        (async () => {
-            let permissionStatus = await Gyroscope.requestPermissionsAsync();
-            if (permissionStatus.status !== 'granted') {
-                setErrorMsg('Please provide permission to access Gyroscope');
-                return;
-            }
-            else {
-                setStatus('granted');
-                setErrorMsg(null);
+    useFocusEffect(
+        React.useCallback(() => {
+            let isActive = true;
 
-                setSubscription(
-                    Gyroscope.addListener(
-                        (gyroscopeData) => {
+            (async () => {
+                let permissionStatus = await Gyroscope.requestPermissionsAsync();
+                if (permissionStatus.status !== 'granted') {
+                    setErrorMsg('Please provide permission to access Gyroscope');
+                    return;
+                } else {
+                    setStatus(true);
+                    setErrorMsg(null);
+
+                    subscription.current = Gyroscope.addListener((gyroscopeData) => {
+                        if (isActive) {
                             setData(gyroscopeData);
-                        })
-                );
-                return () => {
-                    subscription && subscription.remove();
-                    setSubscription(null);
-                };
-            }
-        })();
+                        }
+                    });
+                }
+            })();
 
-    }, []);
+            return () => {
+                isActive = false;
+                if (subscription.current) {
+                    console.log('Gyroscope listener removed');
+                    subscription.current.remove();
+                    subscription.current = null;
+                }
+            };
+        }, [delay, collectData, status])
+    );
 
     return (
         <View style={styles.container}>
             <View style={styles.titleView}>
-                        <Text style={styles.title}>Gyroscope</Text>
+                <Text style={styles.title}>Gyroscope</Text>
             </View>
-            {!errorMsg &&
+            {!errorMsg && (
                 <>
                     <View style={styles.subContainer}>
                         <View style={styles.sensorImageView}>
@@ -88,18 +97,13 @@ export default function Gyro({ delay, collectData }) {
                         </View>
                     </View>
                 </>
-            }
+            )}
 
-            {
-                errorMsg &&
+            {errorMsg && (
                 <View style={styles.errorView}>
                     <Text>{errorMsg}</Text>
                 </View>
-            }
-
+            )}
         </View>
-
     );
 }
-
-

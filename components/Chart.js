@@ -32,19 +32,19 @@
 //     setTimeout(() => {
 //         console.log('Hello2');
 //     }, 1000);
-    
+
 //     useEffect(() => {
 //         console.log('Effect triggered');
 //         const timeoutId = setTimeout(() => {
 //             console.log('Hello2');
 //         }, 1000);
-    
+
 //         return () => {
 //             console.log('Cleanup function called');
 //             clearTimeout(timeoutId);
 //         };
 //     }, []);
-    
+
 
 //     console.log('Hello', data)
 
@@ -96,82 +96,71 @@ import { View, Text, Dimensions, StyleSheet, ScrollView } from 'react-native';
 import { Accelerometer } from 'expo-sensors';
 import { LineChart } from 'react-native-chart-kit';
 
-const LiveChart = () => {
-    const [accelerometerData, setAccelerometerData] = useState({
-        x: Array(20).fill(0),
-        y: Array(20).fill(0),
-        z: Array(20).fill(0),
-      });
-      
-    const roundToTwoDecimals = (num) => Math.round(num * 100) / 100;
-
-  useEffect(() => {
-    const subscription = Accelerometer.addListener(({ x, y, z }) => {
-      setAccelerometerData((prevData) => ({
-        x: [...prevData.x.slice(-20), roundToTwoDecimals(x)], 
-        y: [...prevData.y.slice(-20), roundToTwoDecimals(y)],
-        z: [...prevData.z.slice(-20), roundToTwoDecimals(z)],
-      }));
-      
-    });
-
-    Accelerometer.setUpdateInterval(1000);
-
-    return () => {
-      subscription && subscription.remove();
-    };
-  }, []);
+const LiveChart = ({ name, data }) => {
 
   const chartConfig = {
     backgroundGradientFrom: '#f2f2f2',
     backgroundGradientTo: '#f2f2f2',
     color: (opacity = 1) => `rgba(14, 76, 146, ${opacity})`,
     labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-    strokeWidth: 2, 
+    strokeWidth: 2,
   };
 
   return (
-    <ScrollView>
-      <View style={styles.container}>
-        <Text style={styles.title}>Live Accelerometer Data</Text>
+    // <ScrollView>
+    //   <View style={styles.container}>
+    //     <Text style={styles.title}>Live Accelerometer Data</Text>
 
-        <Text style={styles.chartTitle}>X-axis</Text>
-        <LineChart
-          data={{
-            labels: Array.from({ length: accelerometerData.x.length }, (_, i) => i + 1),
-            datasets: [{ data: accelerometerData.x }],
-          }}
-          width={Dimensions.get('window').width - 20}
-          height={220}
-          chartConfig={chartConfig}
-          bezier
-        />
+    //     <Text style={styles.chartTitle}>X-axis</Text>
+    //     <LineChart
+    //       data={{
+    //         labels: Array.from({ length: accelerometerData.x.length }, (_, i) => i + 1),
+    //         datasets: [{ data: accelerometerData.x }],
+    //       }}
+    //       width={Dimensions.get('window').width - 20}
+    //       height={220}
+    //       chartConfig={chartConfig}
+    //       bezier
+    //     />
 
-        <Text style={styles.chartTitle}>Y-axis</Text>
-        <LineChart
-          data={{
-            labels: Array.from({ length: accelerometerData.y.length }, (_, i) => i + 1),
-            datasets: [{ data: accelerometerData.y }],
-          }}
-          width={Dimensions.get('window').width - 20}
-          height={220}
-          chartConfig={chartConfig}
-          bezier
-        />
+    //     <Text style={styles.chartTitle}>Y-axis</Text>
+    //     <LineChart
+    //       data={{
+    //         labels: Array.from({ length: accelerometerData.y.length }, (_, i) => i + 1),
+    //         datasets: [{ data: accelerometerData.y }],
+    //       }}
+    //       width={Dimensions.get('window').width - 20}
+    //       height={220}
+    //       chartConfig={chartConfig}
+    //       bezier
+    //     />
 
-        <Text style={styles.chartTitle}>Z-axis</Text>
-        <LineChart
-          data={{
-            labels: Array.from({ length: accelerometerData.z.length }, (_, i) => i + 1),
-            datasets: [{ data: accelerometerData.z }],
-          }}
-          width={Dimensions.get('window').width - 20}
-          height={220}
-          chartConfig={chartConfig}
-          bezier
-        />
-      </View>
-    </ScrollView>
+    //     <Text style={styles.chartTitle}>Z-axis</Text>
+    //     <LineChart
+    //       data={{
+    //         labels: Array.from({ length: accelerometerData.z.length }, (_, i) => i + 1),
+    //         datasets: [{ data: accelerometerData.z }],
+    //       }}
+    //       width={Dimensions.get('window').width - 20}
+    //       height={220}
+    //       chartConfig={chartConfig}
+    //       bezier
+    //     />
+    //   </View>
+    // </ScrollView>
+    <View style={styles.container}>
+      <Text style={styles.chartTitle}>{name}</Text>
+      <LineChart
+        data={{
+          labels: Array.from({ length: data.length }, (_, i) => i + 1),
+          datasets: [{ data: data }],
+        }}
+        width={Dimensions.get('window').width - 100}
+        height={160}
+        chartConfig={chartConfig}
+        bezier
+      />
+    </View>
   );
 };
 
@@ -179,6 +168,8 @@ const styles = StyleSheet.create({
   container: {
     padding: 10,
     backgroundColor: '#f2f2f2',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   title: {
     fontSize: 22,
@@ -236,9 +227,9 @@ export default LiveChart;
 
 //   useEffect(() => {
 //     const subscription = Accelerometer.addListener(updateData);
-//     Accelerometer.setUpdateInterval(1000); 
+//     Accelerometer.setUpdateInterval(1000);
 
-//     return () => subscription && subscription.remove(); 
+//     return () => subscription && subscription.remove();
 //   }, [updateData]);
 
 //   return (

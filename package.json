@@ -9,6 +9,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@firebase/database": "^1.0.8",
     "@react-native-async-storage/async-storage": "^1.24.0",
     "@react-native-community/slider": "^4.5.2",
     "@react-native-firebase/auth": "^20.5.0",
@@ -18,6 +19,7 @@
     "@react-navigation/native-stack": "^6.11.0",
     "@react-navigation/stack": "^6.4.1",
     "expo": "~51.0.24",
+    "expo-camera": "~15.0.16",
     "expo-location": "~17.0.1",
     "expo-sensors": "~13.0.9",
     "expo-status-bar": "~1.12.1",
@@ -26,6 +28,7 @@
     "react-native": "0.74.3",
     "react-native-chart-kit": "^6.12.0",
     "react-native-dotenv": "^3.4.11",
+    "react-native-draggable": "^3.3.0",
     "react-native-gesture-handler": "~2.16.1",
     "react-native-highcharts": "^1.0.2",
     "react-native-maps": "1.14.0",

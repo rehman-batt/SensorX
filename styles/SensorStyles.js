@@ -5,6 +5,7 @@ export const foregroundColor1 = '#0e4c92';
 export const buttonBackground = '#0e4c92';
 export const buttonForeground = 'white';
 export const foregroundColor2 = 'black';
+export const camerBackground = '#e6e6e6'
 
 export const styles = StyleSheet.create({
     titleView: {
@@ -89,6 +90,15 @@ export const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+    }, 
+    GraphContainer: {
+        alignItems: 'center',
+    },
+    GraphTitle: {
+        marginTop: 10,
+        marginLeft: 15,
+        fontWeight: 'bold',
+        fontSize: 20,
     }
 });
 

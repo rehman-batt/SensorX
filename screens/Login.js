@@ -4,7 +4,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { AuthStyles } from '../styles/AuthStyles';
 import { foregroundColor1, styles } from '../styles/SensorStyles';
 import { FIREBASE_AUTH } from '../config/firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 
 export default function Login({ navigation }) {
     const [loading, setLoading] = useState(false);
@@ -43,21 +43,21 @@ export default function Login({ navigation }) {
             console.log(error);
             if (error.code === 'auth/weak-password') {
                 errorMessage = 'Password should be at least 6 characters long.';
-              } else if (error.code === 'auth/invalid-email') {
+            } else if (error.code === 'auth/invalid-email') {
                 errorMessage = 'Please enter a valid email address.';
-              } else if (error.code === 'auth/wrong-password') {
+            } else if (error.code === 'auth/wrong-password') {
                 errorMessage = 'Incorrect password. Please try again.';
-              } else if (error.code === 'auth/user-not-found') {
+            } else if (error.code === 'auth/user-not-found') {
                 errorMessage = 'This user does not exist.';
-              } else if (error.code === 'auth/user-disabled') {
+            } else if (error.code === 'auth/user-disabled') {
                 errorMessage = 'Contact Admin. Your account had been suspended.';
-              } else if (error.code === 'auth/invalid-credential') {
+            } else if (error.code === 'auth/invalid-credential') {
                 errorMessage = 'The entered credentials are invalid.';
-              } else if (error.code === 'auth/email-already-in-use') {
+            } else if (error.code === 'auth/email-already-in-use') {
                 errorMessage = 'An account is already registered for this email address.';
-              } else if (error.code === 'auth/credential-already-in-use') {
+            } else if (error.code === 'auth/credential-already-in-use') {
                 errorMessage = 'The entered credentials are already in use by another account.';
-              }
+            }
 
 
             Alert.alert('Login Error', errorMessage);
@@ -65,6 +65,32 @@ export default function Login({ navigation }) {
             setLoading(false);
         }
     };
+
+    const resetPassword = async () => {
+        if (!email) {
+            Alert.alert('Reset Password', 'Please enter your email address first.');
+            return;
+        }
+
+        try {
+            setLoading(true);
+            let response = await sendPasswordResetEmail(auth, email);
+            Alert.alert('Reset Password', 'A password reset link has been sent to your email.');
+        } catch (error) {
+            let errorMessage = 'Failed to send password reset email.';
+            console.log(error);
+            if (error.code === 'auth/invalid-email') {
+                errorMessage = 'Please enter a valid email address.';
+            } else if (error.code === 'auth/user-not-found') {
+                errorMessage = 'This user does not exist.';
+            }
+
+            Alert.alert('Reset Password Error', errorMessage);
+        } finally {
+            setLoading(false);
+        }
+    };
+
 
     return (
         <View style={AuthStyles.container}>
@@ -93,6 +119,12 @@ export default function Login({ navigation }) {
                         <Text style={AuthStyles.buttonText}>Sign In</Text>
                     </TouchableOpacity>
                 }
+
+                {!loading && (
+                    <TouchableOpacity onPress={resetPassword}>
+                        <Text style={AuthStyles.linkText}>Forgot Password? Reset</Text>
+                    </TouchableOpacity>
+                )}
 
                 {!loading &&
                     <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>

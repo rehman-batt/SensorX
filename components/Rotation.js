@@ -1,12 +1,13 @@
 import { Text, View, Image } from 'react-native';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { styles } from '../styles/SensorStyles';
 import { DeviceMotion } from 'expo-sensors';
+import { useFocusEffect } from '@react-navigation/native';
 
 
-export default function Rotation({ delay, collectData}) {
+export default function Rotation({ delay, collectData, data }) {
 
-    const [dataStream, setDataStream] = useState([]);
+    const [status, setStatus] = useState(false);
     const [errorMsg, setErrorMsg] = useState('Please provide permission to access device motion');
     const [{ alpha, beta, gamma }, setData] = useState({
         alpha: 0,
@@ -14,46 +15,61 @@ export default function Rotation({ delay, collectData}) {
         gamma: 0,
     });
 
-    const [subscription, setSubscription] = useState(null);
-    const [status, setStatus] = useState('denied');
+    const subscription = useRef(null);
+
+    if (collectData && status) {
+
+        data.current['alpha'].push(alpha);
+        data.current['beta'].push(beta);
+        data.current['gamma'].push(gamma);
+        data.current['timestamp'].push(Date.now());
+    }
+
     DeviceMotion.setUpdateInterval(delay);
 
-    useEffect(() => {
-        (async () => {
+    useFocusEffect(
+        React.useCallback(() => {
+            let isActive = true;
 
-            let permissionStatus = await DeviceMotion.requestPermissionsAsync();
-            if (permissionStatus.status !== 'granted') {
-                setErrorMsg('Please provide permission to access device motion');
-                return;
-            }
-            else {
-                setStatus('granted');
-                setErrorMsg(null);
+            (async () => {
+                let permissionStatus = await DeviceMotion.requestPermissionsAsync();
+                if (permissionStatus.status !== 'granted') {
+                    setErrorMsg('Please provide permission to access device motion');
+                    return;
+                } else {
+                    setStatus(true);
+                    setErrorMsg(null);
 
-                setSubscription(
-                    DeviceMotion.addListener(motionData => {
+                    subscription.current = DeviceMotion.addListener(motionData => {
 
-                        if (motionData.rotation) {
-                            setData(motionData.rotation);
-                        } else {
-                            setData({
-                                alpha: 0,
-                                beta: 0,
-                                gamma: 0,
-                            });
-                        }
-                    })
-                );
+                            if (motionData.rotation) {
+                                setData(motionData.rotation);
 
-                return () => {
-                    subscription && subscription.remove();
-                    setSubscription(null);
-                };
-            }
+                            } else {
+                                setData({
+                                    alpha: 0,
+                                    beta: 0,
+                                    gamma: 0,
+                                });
 
-        })();
+                            }
+                        });
+                   
+                }
+            })();
 
-    }, []);
+            return () => {
+                isActive = false;
+                if (subscription.current) {
+                    console.log('Motion Acceleration listener removed');
+                    subscription.current.remove();
+                    subscription.current = null;
+                }
+            };
+        }, [delay, collectData, status])
+    );
+
+    
 
     return (
 

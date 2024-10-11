@@ -1,59 +1,67 @@
 import { Text, View, Image } from 'react-native';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import React from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { styles } from '../styles/SensorStyles';
 import * as Location from 'expo-location';
 
-
-export default function LatLong({ updateLatLong, latitude, longitude, delay }) {
+export default function LatLong({ delay, collectData, data }) {
 
     const [errorMsg, setErrorMsg] = useState('Please provide permission to access location');
-    const [dataStream, setDataStream] = useState([]);
-    const [status, setStatus] = useState('denied');
+    const [status, setStatus] = useState(false);
+    const [latitude, setLatitude] = useState(null);
+    const [longitude, setLongitude] = useState(null);
+    const locationWatcher = useRef(null);
 
-    useEffect(() => {
-        (async () => {
+    useFocusEffect(
+        React.useCallback(() => {
+            let isActive = true;
 
-            let permissionStatus = await Location.requestForegroundPermissionsAsync();
-            if (permissionStatus.status !== 'granted') {
-                setErrorMsg('Please provide permission to access location');
-                return;
-            }
+            (async () => {
+                let permissionStatus = await Location.requestForegroundPermissionsAsync();
+                if (permissionStatus.status !== 'granted') {
+                    setErrorMsg('Please provide permission to access location');
+                    return;
+                } else { 
+                    setStatus(true);
+                    await Location.enableNetworkProviderAsync();
+                    setErrorMsg(null);
 
-            else {
-                setStatus('granted');
-                await Location.enableNetworkProviderAsync();
-                setErrorMsg(null);
-                let location = await Location.getCurrentPositionAsync({});
+                    locationWatcher.current = await Location.watchPositionAsync({
+                        accuracy: Location.Accuracy.High,
+                        timeInterval: delay,
+                        distanceInterval: 0,
+                    }, (location) => {
+                        if (isActive) {
+                            setLatitude(location.coords.latitude);
+                            setLongitude(location.coords.longitude);
 
-                updateLatLong(location.coords.latitude, location.coords.longitude);
-            }
+                            if (status && collectData) {
+                                data.current['lat'].push(location.coords.latitude);
+                                data.current['long'].push(location.coords.longitude);
+                                data.current['timestamp'].push(Date.now());
+                            }
+                        }
+                    });
+                }
+            })();
 
-        })();
-
-
-    }, []);
-
-    useEffect(() => {
-
-        const fn = async () => {
-            let location = await Location.getCurrentPositionAsync({});
-            updateLatLong(location.coords.latitude, location.coords.longitude);
-        }
-
-        let update = setTimeout(fn, delay);
-
-        return () => {
-            clearTimeout(update);
-        };
-    })
+            return () => {
+                isActive = false;
+                if (locationWatcher.current) {
+                    console.log('Location Watcher Removed');
+                    locationWatcher.current.remove();
+                }
+            };
+        }, [delay, collectData, status])
+    );
 
     return (
-
         <View style={styles.container}>
             <View style={styles.titleView}>
                 <Text style={styles.title}>Latitude Longitude</Text>
             </View>
-            {!errorMsg &&
+            {!errorMsg && (
                 <>
                     <View style={styles.subContainer}>
                         <View style={styles.sensorImageView}>
@@ -84,17 +92,13 @@ export default function LatLong({ updateLatLong, latitude, longitude, delay }) {
                         </View>
                     </View>
                 </>
-            }
+            )}
 
-            {
-                errorMsg &&
+            {errorMsg && (
                 <View style={styles.errorView}>
                     <Text>{errorMsg}</Text>
                 </View>
-                
-            }
-
+            )}
         </View>
-
     );
 }

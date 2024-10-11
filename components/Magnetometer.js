@@ -1,55 +1,63 @@
 import { Text, View, Image } from 'react-native';
 import { Magnetometer } from 'expo-sensors';
-import { useState, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { styles } from '../styles/SensorStyles';
 
-export default function Magnet({ delay, collectData }) {
+export default function Magnet({ delay, collectData, data }) {
 
-    const [dataStream, setDataStream] = useState([]);
+    const [status, setStatus] = useState(false);
     const [errorMsg, setErrorMsg] = useState('Please provide permission to access Magnetometer');
-    const [{ x, y, z }, setData] = useState({
-        x: 0,
-        y: 0,
-        z: 0,
-    });
-    const [subscription, setSubscription] = useState(null);
-    const [status, setStatus] = useState('denied');
+    const [{ x, y, z }, setData] = useState({ x: 0, y: 0, z: 0 });
+    const subscription = useRef(null);
+
+    if (collectData && status) {
+        data.current['x'].push(x);
+        data.current['y'].push(y);
+        data.current['z'].push(z);
+        data.current['timestamp'].push(Date.now());
+    }
+
     Magnetometer.setUpdateInterval(delay);
 
-    useEffect(() => {
-        (async () => {
-            let permissionStatus = await Magnetometer.requestPermissionsAsync();
-            if (permissionStatus.status !== 'granted') {
-                setErrorMsg('Please provide permission to access Magnetometer');
-                return;
-            }
-            else {
-                setStatus('granted');
-                setErrorMsg(null);
+    useFocusEffect(
+        React.useCallback(() => {
+            let isActive = true;
 
-                setSubscription(
-                    Magnetometer.addListener(
-                        (magnetometerData) => {
+            (async () => {
+                let permissionStatus = await Magnetometer.requestPermissionsAsync();
+                if (permissionStatus.status !== 'granted') {
+                    setErrorMsg('Please provide permission to access Magnetometer');
+                    return;
+                } else {
+                    setStatus(true);
+                    setErrorMsg(null);
+
+                    subscription.current = Magnetometer.addListener((magnetometerData) => {
+                        if (isActive) {
                             setData(magnetometerData);
-                        })
-                );
+                        }
+                    });
+                }
+            })();
 
-                return () => {
-                    subscription && subscription.remove();
-                    setSubscription(null);
-                };
-            }
-        })();
-
-    }, []);
+            return () => {
+                isActive = false;
+                if (subscription.current) {
+                    console.log('Magnetometer listener removed');
+                    subscription.current.remove();
+                    subscription.current = null;
+                }
+            };
+        }, [delay, collectData, status])
+    );
 
     return (
-
         <View style={styles.container}>
             <View style={styles.titleView}>
                 <Text style={styles.title}>Magnetometer</Text>
             </View>
-            {!errorMsg &&
+            {!errorMsg && (
                 <>
                     <View style={styles.subContainer}>
                         <View style={styles.sensorImageView}>
@@ -89,20 +97,13 @@ export default function Magnet({ delay, collectData }) {
                         </View>
                     </View>
                 </>
-            }
+            )}
 
-            {
-                errorMsg &&
+            {errorMsg && (
                 <View style={styles.errorView}>
                     <Text>{errorMsg}</Text>
                 </View>
-            }
-
+            )}
         </View>
-
-
-
     );
 }
-
-
