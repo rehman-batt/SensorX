@@ -93,9 +93,11 @@ export const styles = StyleSheet.create({
     }, 
     GraphContainer: {
         alignItems: 'center',
+        marginTop: 5,
     },
     GraphTitle: {
         marginTop: 10,
+        marginBottom: 5,
         marginLeft: 15,
         fontWeight: 'bold',
         fontSize: 20,

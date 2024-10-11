@@ -1,45 +1,44 @@
 import { Text, View, Image } from 'react-native';
-import { Accelerometer } from 'expo-sensors';
+import { DeviceMotion } from 'expo-sensors';
 import React, { useState, useRef } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { styles } from '../styles/SensorStyles';
 import LiveChart from "../components/Chart";
 
-export default function AcceleroGraph({ }) {
+export default function MotionAccGraph({ }) {
     const [status, setStatus] = useState(false);
-    const [errorMsg, setErrorMsg] = useState('Please provide permission to access Accelerometer');
-    const [accelerometerData, setAccelerometerData] = useState({
+    const [errorMsg, setErrorMsg] = useState('Please provide permission to access DeviceMotion');
+    const [motionAccData, setMotionAccData] = useState({
         x: Array(10).fill(0),
         y: Array(10).fill(0),
         z: Array(10).fill(0),
     });
-
-    // console.log('Acc Rerendered');
-
+   
     const roundToTwoDecimals = (num) => Math.round(num * 100) / 100;
     const subscription = useRef(null);
 
-    Accelerometer.setUpdateInterval(1000);
+    DeviceMotion.setUpdateInterval(1000);
 
     useFocusEffect(
         React.useCallback(() => {
             let isActive = true;
-
+            
             (async () => {
-                let permissionStatus = await Accelerometer.requestPermissionsAsync();
+                let permissionStatus = await DeviceMotion.requestPermissionsAsync();
                 if (permissionStatus.status !== 'granted') {
-                    setErrorMsg('Please provide permission to access Accelerometer');
+                    setErrorMsg('Please provide permission to access DeviceMotion');
                     return;
                 } else {
                     setStatus(true);
                     setErrorMsg(null);
-                    // console.log('Acc Rerendered 2');
-                    subscription.current = Accelerometer.addListener(({ x, y, z }) => {
-                        if (isActive) {
-                            setAccelerometerData((prevData) => ({
-                                x: [...prevData.x.slice(-10), roundToTwoDecimals(x)],
-                                y: [...prevData.y.slice(-10), roundToTwoDecimals(y)],
-                                z: [...prevData.z.slice(-10), roundToTwoDecimals(z)],
+                    
+                    subscription.current = DeviceMotion.addListener(motionData => {
+                        if (isActive  && motionData.acceleration) {
+                            
+                            setMotionAccData((prevData) => ({
+                                x: [...prevData.x.slice(-10), roundToTwoDecimals(motionData.acceleration.x)],
+                                y: [...prevData.y.slice(-10), roundToTwoDecimals(motionData.acceleration.y)],
+                                z: [...prevData.z.slice(-10), roundToTwoDecimals(motionData.acceleration.z)],
                             }));
                         }
 
@@ -51,7 +50,7 @@ export default function AcceleroGraph({ }) {
                 isActive = false;
 
                 if (subscription.current) {
-                    console.log('Accelerometer listener removed');
+                    console.log('DeviceMotion listener removed');
                     subscription.current.remove();
                     subscription.current = null;
                 }
@@ -71,10 +70,10 @@ export default function AcceleroGraph({ }) {
 
             {!errorMsg &&
                 <View style={styles.GraphContainer}>
-                    <Text style={styles.GraphTitle}>Accelerometer</Text>
-                    <LiveChart name={'X-axis'} data={accelerometerData.x} />
-                    <LiveChart name={'Y-axis'} data={accelerometerData.y} />
-                    <LiveChart name={'Z-axis'} data={accelerometerData.z} />
+                    <Text style={styles.GraphTitle}>Motion Acceleration</Text>
+                    <LiveChart name={'X-axis'} data={motionAccData.x} />
+                    <LiveChart name={'Y-axis'} data={motionAccData.y} />
+                    <LiveChart name={'Z-axis'} data={motionAccData.z} />
                 </View>
             }
 
