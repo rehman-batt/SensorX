@@ -4,7 +4,6 @@ import { Image } from 'react-native';
 import GyroGraph from '../components/GyroGraph';
 import MagnetoGraph from '../components/MagnetoGraph';
 import MagnetoUncGraph from '../components/MagnetoUncGraph';
-import MotionAcc from '../components/MotionAcc';
 import MotionAccGraph from '../components/MotionAccGraph';
 import RotationGraph from '../components/RotationGraph';
 import RotationRateGraph from '../components/RotationRateGraph';
@@ -36,7 +35,7 @@ export default function Viz() {
                 }}
             />
 
-            <Tab.Screen
+            {/* <Tab.Screen
                 name="Gyroscope Graph"
                 component={GyroGraph}
                 options={{
@@ -169,7 +168,7 @@ export default function Viz() {
                     tabBarLabel: () => null,
                     headerShown: false
                 }}
-            />
+            /> */}
         </Tab.Navigator>
 
     )

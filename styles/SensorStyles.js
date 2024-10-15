@@ -92,15 +92,16 @@ export const styles = StyleSheet.create({
         alignItems: 'center',
     }, 
     GraphContainer: {
+        
+        flex: 1,
+        width: '100%',
         alignItems: 'center',
-        marginTop: 5,
+        
     },
     GraphTitle: {
-        marginTop: 10,
-        marginBottom: 5,
-        marginLeft: 15,
+        marginTop: 70,
         fontWeight: 'bold',
-        fontSize: 20,
+        fontSize: 30,
     }
 });
 

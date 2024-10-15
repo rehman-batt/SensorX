@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, TextInput, TouchableOpacity, Text, ActivityIndicator, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { AuthStyles } from '../styles/AuthStyles';
-import { foregroundColor1, styles } from '../styles/SensorStyles';
+import { foregroundColor1 } from '../styles/SensorStyles';
 import { FIREBASE_AUTH } from '../config/firebase';
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 
@@ -10,6 +10,7 @@ export default function Login({ navigation }) {
     const [loading, setLoading] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
     const auth = FIREBASE_AUTH;
 
     const validateInput = () => {
@@ -59,7 +60,6 @@ export default function Login({ navigation }) {
                 errorMessage = 'The entered credentials are already in use by another account.';
             }
 
-
             Alert.alert('Login Error', errorMessage);
         } finally {
             setLoading(false);
@@ -91,7 +91,6 @@ export default function Login({ navigation }) {
         }
     };
 
-
     return (
         <View style={AuthStyles.container}>
             <Icon name="person" size={100} color={foregroundColor1} style={AuthStyles.icon} />
@@ -104,21 +103,29 @@ export default function Login({ navigation }) {
                     value={email}
                     onChangeText={(e) => setEmail(e)}
                 />
-                <TextInput
-                    style={AuthStyles.input}
-                    placeholder="Password"
-                    secureTextEntry
-                    value={password}
-                    onChangeText={(p) => setPassword(p)}
-                />
+                <View style={AuthStyles.passwordContainer}>
+                    <TextInput
+                        style={AuthStyles.input}
+                        placeholder="Password"
+                        secureTextEntry={!showPassword} // Toggle visibility
+                        value={password}
+                        onChangeText={(p) => setPassword(p)}
+                    />
+                    <TouchableOpacity
+                        style={AuthStyles.eyeIconContainer}
+                        onPress={() => setShowPassword(!showPassword)} // Toggle the state
+                    >
+                        <Icon name={showPassword ? 'visibility' : 'visibility-off'} size={25} color="gray" />
+                    </TouchableOpacity>
+                </View>
 
                 {loading && <ActivityIndicator color={foregroundColor1} size={50} style={AuthStyles.loading} />}
 
-                {!loading &&
+                {!loading && (
                     <TouchableOpacity style={AuthStyles.button} onPress={login}>
                         <Text style={AuthStyles.buttonText}>Sign In</Text>
                     </TouchableOpacity>
-                }
+                )}
 
                 {!loading && (
                     <TouchableOpacity onPress={resetPassword}>
@@ -126,11 +133,11 @@ export default function Login({ navigation }) {
                     </TouchableOpacity>
                 )}
 
-                {!loading &&
+                {!loading && (
                     <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
                         <Text style={AuthStyles.linkText}>Don't have an account? Sign Up</Text>
                     </TouchableOpacity>
-                }
+                )}
             </View>
         </View>
     );

@@ -124,5 +124,15 @@ export const AuthStyles = StyleSheet.create({
     },
     loading: {
         marginTop: 50,
-    }
+    },
+    passwordContainer: {
+        width: '100%',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    eyeIconContainer: {
+        position: 'relative',
+        right: 35,
+    },
 });

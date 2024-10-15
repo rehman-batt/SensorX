@@ -20,7 +20,8 @@
         "android.permission.ACCESS_FINE_LOCATION",
         "HIGH_SAMPLING_RATE_SENSORS"
       ],
-      "package": "com.rehmanbatt.SensorX"
+      "package": "com.rehmanbatt.SensorX",
+      "googleServicesFile": "./google-services.json"
     },
     "plugins": [
       "@react-native-firebase/app",

@@ -14,8 +14,6 @@ export default function AcceleroGraph({ }) {
         z: Array(10).fill(0),
     });
 
-    // console.log('Acc Rerendered');
-
     const roundToTwoDecimals = (num) => Math.round(num * 100) / 100;
     const subscription = useRef(null);
 
@@ -33,13 +31,13 @@ export default function AcceleroGraph({ }) {
                 } else {
                     setStatus(true);
                     setErrorMsg(null);
-                    // console.log('Acc Rerendered 2');
+                    
                     subscription.current = Accelerometer.addListener(({ x, y, z }) => {
                         if (isActive) {
                             setAccelerometerData((prevData) => ({
-                                x: [...prevData.x.slice(-10), roundToTwoDecimals(x)],
-                                y: [...prevData.y.slice(-10), roundToTwoDecimals(y)],
-                                z: [...prevData.z.slice(-10), roundToTwoDecimals(z)],
+                                x: [...prevData.x.slice(-9), roundToTwoDecimals(x)],
+                                y: [...prevData.y.slice(-9), roundToTwoDecimals(y)],
+                                z: [...prevData.z.slice(-9), roundToTwoDecimals(z)],
                             }));
                         }
 
@@ -72,9 +70,8 @@ export default function AcceleroGraph({ }) {
             {!errorMsg &&
                 <View style={styles.GraphContainer}>
                     <Text style={styles.GraphTitle}>Accelerometer</Text>
-                    <LiveChart name={'X-axis'} data={accelerometerData.x} />
-                    <LiveChart name={'Y-axis'} data={accelerometerData.y} />
-                    <LiveChart name={'Z-axis'} data={accelerometerData.z} />
+                    <LiveChart name1={'X-axis'} data1={accelerometerData.x} name2={'Y-axis'} data2={accelerometerData.y} name3={'Z-axis'} data3={accelerometerData.z}/>
+                    
                 </View>
             }
 
