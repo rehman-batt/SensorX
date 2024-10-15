@@ -13,8 +13,6 @@ export default function MagnetoGraph({ }) {
         y: Array(10).fill(0),
         z: Array(10).fill(0),
     });
-    
-    // console.log('Magneto Rerendered');
 
     const roundToTwoDecimals = (num) => Math.round(num * 100) / 100;
     const subscription = useRef(null);
@@ -24,7 +22,7 @@ export default function MagnetoGraph({ }) {
     useFocusEffect(
         React.useCallback(() => {
             let isActive = true;
-        
+
             (async () => {
                 let permissionStatus = await Magnetometer.requestPermissionsAsync();
                 if (permissionStatus.status !== 'granted') {
@@ -33,13 +31,12 @@ export default function MagnetoGraph({ }) {
                 } else {
                     setStatus(true);
                     setErrorMsg(null);
-                    // console.log('Magneto Rerendered 2');
                     subscription.current = Magnetometer.addListener(({ x, y, z }) => {
                         if (isActive) {
                             setmagnatoData((prevData) => ({
-                                x: [...prevData.x.slice(-10), roundToTwoDecimals(x)],
-                                y: [...prevData.y.slice(-10), roundToTwoDecimals(y)],
-                                z: [...prevData.z.slice(-10), roundToTwoDecimals(z)],
+                                x: [...prevData.x.slice(-9), roundToTwoDecimals(x)],
+                                y: [...prevData.y.slice(-9), roundToTwoDecimals(y)],
+                                z: [...prevData.z.slice(-9), roundToTwoDecimals(z)],
                             }));
                         }
 
@@ -60,11 +57,11 @@ export default function MagnetoGraph({ }) {
     );
 
     return (
-        <>
+        <View style={{ flex: 1, justifyContent: 'center' }}>
             {errorMsg &&
-                <View style={styles.container}>
+                <View style={styles.errorContainer}>
                     <View style={styles.errorView}>
-                        <Text>{errorMsg}</Text>
+                        <Text style={styles.errorText}>{errorMsg}</Text>
                     </View>
                 </View>
             }
@@ -72,12 +69,11 @@ export default function MagnetoGraph({ }) {
             {!errorMsg &&
                 <View style={styles.GraphContainer}>
                     <Text style={styles.GraphTitle}>Magnetometer</Text>
-                    <LiveChart name={'X-axis'} data={magnatoData.x} />
-                    <LiveChart name={'Y-axis'} data={magnatoData.y} />
-                    <LiveChart name={'Z-axis'} data={magnatoData.z} />
+                    <LiveChart name1={'X-axis'} data1={magnatoData.x} name2={'Y-axis'} data2={magnatoData.y} name3={'Z-axis'} data3={magnatoData.z} />
+
                 </View>
             }
 
-        </>
+        </View>
     );
 }

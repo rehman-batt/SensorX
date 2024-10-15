@@ -31,14 +31,14 @@ export default function RotationRateGraph({ }) {
                 } else {
                     setStatus(true);
                     setErrorMsg(null);
-                
+                    
                     subscription.current = DeviceMotion.addListener(motionData => {
                         if (isActive  && motionData.rotationRate) {
                 
                             setRotationData((prevData) => ({
-                                alpha: [...prevData.alpha.slice(-10), roundToTwoDecimals(motionData.rotationRate.alpha)],
-                                beta: [...prevData.beta.slice(-10), roundToTwoDecimals(motionData.rotationRate.beta)],
-                                gamma: [...prevData.gamma.slice(-10), roundToTwoDecimals(motionData.rotationRate.gamma)],
+                                alpha: [...prevData.alpha.slice(-9), roundToTwoDecimals(motionData.rotationRate.alpha)],
+                                beta: [...prevData.beta.slice(-9), roundToTwoDecimals(motionData.rotationRate.beta)],
+                                gamma: [...prevData.gamma.slice(-9), roundToTwoDecimals(motionData.rotationRate.gamma)],
                             }));
                         }
 
@@ -59,11 +59,11 @@ export default function RotationRateGraph({ }) {
     );
 
     return (
-        <>
+        <View style={{flex: 1, justifyContent: 'center'}}>
             {errorMsg &&
-                <View style={styles.container}>
+                <View style={styles.errorContainer}>
                     <View style={styles.errorView}>
-                        <Text>{errorMsg}</Text>
+                        <Text style={styles.errorText}>{errorMsg}</Text>
                     </View>
                 </View>
             }
@@ -71,12 +71,11 @@ export default function RotationRateGraph({ }) {
             {!errorMsg &&
                 <View style={styles.GraphContainer}>
                     <Text style={styles.GraphTitle}>Device Rotation Rate</Text>
-                    <LiveChart name={'Alpha'} data={rotationData.alpha} />
-                    <LiveChart name={'Beta'} data={rotationData.beta} />
-                    <LiveChart name={'Gamma'} data={rotationData.gamma} />
+                    <LiveChart name1={'Alpha'} data1={rotationData.alpha} name2={'Beta'} data2={rotationData.beta} name3={'Gamma'} data3={rotationData.gamma}/>
+
                 </View>
             }
 
-        </>
+        </View>
     );
 }

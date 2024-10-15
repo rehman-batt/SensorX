@@ -13,7 +13,7 @@ export default function RotationGraph({ }) {
         beta: Array(10).fill(0),
         gamma: Array(10).fill(0),
     });
-   
+
     const roundToTwoDecimals = (num) => Math.round(num * 100) / 100;
     const subscription = useRef(null);
 
@@ -22,7 +22,7 @@ export default function RotationGraph({ }) {
     useFocusEffect(
         React.useCallback(() => {
             let isActive = true;
-        
+
             (async () => {
                 let permissionStatus = await DeviceMotion.requestPermissionsAsync();
                 if (permissionStatus.status !== 'granted') {
@@ -31,14 +31,14 @@ export default function RotationGraph({ }) {
                 } else {
                     setStatus(true);
                     setErrorMsg(null);
-                
+
                     subscription.current = DeviceMotion.addListener(motionData => {
-                        if (isActive  && motionData.rotation) {
-                
+                        if (isActive && motionData.rotation) {
+
                             setRotationData((prevData) => ({
-                                alpha: [...prevData.alpha.slice(-10), roundToTwoDecimals(motionData.rotation.alpha)],
-                                beta: [...prevData.beta.slice(-10), roundToTwoDecimals(motionData.rotation.beta)],
-                                gamma: [...prevData.gamma.slice(-10), roundToTwoDecimals(motionData.rotation.gamma)],
+                                alpha: [...prevData.alpha.slice(-9), roundToTwoDecimals(motionData.rotation.alpha)],
+                                beta: [...prevData.beta.slice(-9), roundToTwoDecimals(motionData.rotation.beta)],
+                                gamma: [...prevData.gamma.slice(-9), roundToTwoDecimals(motionData.rotation.gamma)],
                             }));
                         }
 
@@ -59,11 +59,11 @@ export default function RotationGraph({ }) {
     );
 
     return (
-        <>
+        <View style={{ flex: 1, justifyContent: 'center' }}>
             {errorMsg &&
-                <View style={styles.container}>
+                <View style={styles.errorContainer}>
                     <View style={styles.errorView}>
-                        <Text>{errorMsg}</Text>
+                        <Text style={styles.errorText}>{errorMsg}</Text>
                     </View>
                 </View>
             }
@@ -71,12 +71,11 @@ export default function RotationGraph({ }) {
             {!errorMsg &&
                 <View style={styles.GraphContainer}>
                     <Text style={styles.GraphTitle}>Device Rotation</Text>
-                    <LiveChart name={'Alpha'} data={rotationData.alpha} />
-                    <LiveChart name={'Beta'} data={rotationData.beta} />
-                    <LiveChart name={'Gamma'} data={rotationData.gamma} />
+                    <LiveChart name1={'Alpha'} data1={rotationData.alpha} name2={'Beta'} data2={rotationData.beta} name3={'Gamma'} data3={rotationData.gamma} />
+
                 </View>
             }
 
-        </>
+        </View>
     );
 }

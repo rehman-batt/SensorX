@@ -86,11 +86,35 @@ export const styles = StyleSheet.create({
         fontSize: 15,
         marginLeft: 5,
     },
+    errorContainer: {
+ 
+        justifyContent: 'center',
+        alignItems: 'center',
+        alignSelf: 'center',
+        
+
+        width: '95%',
+        backgroundColor: backgroundColor,
+        borderWidth: 1,
+        marginTop: '4%',
+        borderRadius: 5,
+        overflow: 'hidden',
+        borderColor: 'transparent',
+        shadowColor: foregroundColor2,
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.8,
+        shadowRadius: 2,  
+        elevation: 5,
+        height: 300,
+    },
     errorView: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
     }, 
+    errorText: {
+        textAlign: 'center',
+    },
     GraphContainer: {
         
         flex: 1,
@@ -99,9 +123,10 @@ export const styles = StyleSheet.create({
         
     },
     GraphTitle: {
-        marginTop: 70,
+        marginTop: 75,
         fontWeight: 'bold',
         fontSize: 30,
+        textAlign: 'center',
     }
 });
 

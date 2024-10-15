@@ -14,8 +14,6 @@ export default function GyroGraph({ }) {
         z: Array(10).fill(0),
     });
 
-    // console.log('Gyro Rerendered');
-
     const roundToTwoDecimals = (num) => Math.round(num * 100) / 100;
     const subscription = useRef(null);
 
@@ -33,13 +31,13 @@ export default function GyroGraph({ }) {
                 } else {
                     setStatus(true);
                     setErrorMsg(null);
-                    // console.log('Gyro Rerendered 2');
+
                     subscription.current = Gyroscope.addListener(({ x, y, z }) => {
                         if (isActive) {
                             setGyroData((prevData) => ({
-                                x: [...prevData.x.slice(-10), roundToTwoDecimals(x)],
-                                y: [...prevData.y.slice(-10), roundToTwoDecimals(y)],
-                                z: [...prevData.z.slice(-10), roundToTwoDecimals(z)],
+                                x: [...prevData.x.slice(-9), roundToTwoDecimals(x)],
+                                y: [...prevData.y.slice(-9), roundToTwoDecimals(y)],
+                                z: [...prevData.z.slice(-9), roundToTwoDecimals(z)],
                             }));
                         }
 
@@ -60,11 +58,11 @@ export default function GyroGraph({ }) {
     );
 
     return (
-        <>
+        <View style={{ flex: 1, justifyContent: 'center' }}>
             {errorMsg &&
-                <View style={styles.container}>
+                <View style={styles.errorContainer}>
                     <View style={styles.errorView}>
-                        <Text>{errorMsg}</Text>
+                        <Text style={styles.errorText}>{errorMsg}</Text>
                     </View>
                 </View>
             }
@@ -72,12 +70,11 @@ export default function GyroGraph({ }) {
             {!errorMsg &&
                 <View style={styles.GraphContainer}>
                     <Text style={styles.GraphTitle}>Gyroscope</Text>
-                    <LiveChart name={'X-axis'} data={gyroData.x} />
-                    <LiveChart name={'Y-axis'} data={gyroData.y} />
-                    <LiveChart name={'Z-axis'} data={gyroData.z} />
+                    <LiveChart name1={'X-axis'} data1={gyroData.x} name2={'Y-axis'} data2={gyroData.y} name3={'Z-axis'} data3={gyroData.z} />
+
                 </View>
             }
 
-        </>
+        </View>
     );
 }

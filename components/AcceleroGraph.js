@@ -31,7 +31,7 @@ export default function AcceleroGraph({ }) {
                 } else {
                     setStatus(true);
                     setErrorMsg(null);
-                    
+
                     subscription.current = Accelerometer.addListener(({ x, y, z }) => {
                         if (isActive) {
                             setAccelerometerData((prevData) => ({
@@ -58,11 +58,11 @@ export default function AcceleroGraph({ }) {
     );
 
     return (
-        <>
+        <View style={{ flex: 1, justifyContent: 'center' }}>
             {errorMsg &&
-                <View style={styles.container}>
+                <View style={styles.errorContainer}>
                     <View style={styles.errorView}>
-                        <Text>{errorMsg}</Text>
+                        <Text style={styles.errorText}>{errorMsg}</Text>
                     </View>
                 </View>
             }
@@ -70,11 +70,11 @@ export default function AcceleroGraph({ }) {
             {!errorMsg &&
                 <View style={styles.GraphContainer}>
                     <Text style={styles.GraphTitle}>Accelerometer</Text>
-                    <LiveChart name1={'X-axis'} data1={accelerometerData.x} name2={'Y-axis'} data2={accelerometerData.y} name3={'Z-axis'} data3={accelerometerData.z}/>
-                    
+                    <LiveChart name1={'X-axis'} data1={accelerometerData.x} name2={'Y-axis'} data2={accelerometerData.y} name3={'Z-axis'} data3={accelerometerData.z} />
+
                 </View>
             }
 
-        </>
+        </View>
     );
 }
