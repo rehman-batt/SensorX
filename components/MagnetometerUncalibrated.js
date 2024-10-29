@@ -44,7 +44,7 @@ export default function MagnetUnc({ delay, collectData, data }) {
             return () => {
                 isActive = false;
                 if (subscription.current) {
-                    console.log('Magnetometer Uncalibrated listener removed');
+                    // console.log('Magnetometer Uncalibrated listener removed');
                     subscription.current.remove();
                     subscription.current = null;
                 }

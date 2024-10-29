@@ -49,7 +49,7 @@ export default function LatLong({ delay, collectData, data }) {
             return () => {
                 isActive = false;
                 if (locationWatcher.current) {
-                    console.log('Location Watcher Removed');
+                    // console.log('Location Watcher Removed');
                     locationWatcher.current.remove();
                 }
             };

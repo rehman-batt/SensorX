@@ -44,7 +44,7 @@ export default function Gyro({ delay, collectData, data }) {
             return () => {
                 isActive = false;
                 if (subscription.current) {
-                    console.log('Gyroscope listener removed');
+                    // console.log('Gyroscope listener removed');
                     subscription.current.remove();
                     subscription.current = null;
                 }

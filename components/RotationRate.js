@@ -61,7 +61,7 @@ export default function RotationRate({ delay, collectData, data }) {
             return () => {
                 isActive = false;
                 if (subscription.current) {
-                    console.log('Motion Acceleration listener removed');
+                    // console.log('Motion Acceleration listener removed');
                     subscription.current.remove();
                     subscription.current = null;
                 }

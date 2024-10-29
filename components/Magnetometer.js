@@ -44,7 +44,7 @@ export default function Magnet({ delay, collectData, data }) {
             return () => {
                 isActive = false;
                 if (subscription.current) {
-                    console.log('Magnetometer listener removed');
+                    // console.log('Magnetometer listener removed');
                     subscription.current.remove();
                     subscription.current = null;
                 }

@@ -45,7 +45,7 @@ export default function Accelero({ delay, collectData, data }) {
                 isActive = false;
                 
                 if (subscription.current) {
-                    console.log('Accelerometer listener removed');
+                    // console.log('Accelerometer listener removed');
                     subscription.current.remove();
                     subscription.current = null;
                 }

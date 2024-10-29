@@ -51,6 +51,8 @@ export const SettingsStyles = StyleSheet.create({
         borderRadius: 100,
         backgroundColor: buttonForeground,
         padding: 10,
+        
+        overflow: 'hidden',
     },
     userDataContainer: {
         margin: 0,
@@ -117,12 +119,23 @@ export const SettingsStyles = StyleSheet.create({
     deleteIcon: {
         color: buttonForeground,
         paddingRight: 2,
-    }, 
+    },
     deleteActivityIndicator: {
         marginTop: 20,
     },
     dataActivityIndicator: {
         marginVertical: 130,
+    },
+    profileImage: {
+        width: 130,
+        height: 130,
+        borderRadius: 70,
+        marginBottom: 30,
+        borderWidth: 1,
+        borderColor: foregroundColor1,
+        overflow: 'hidden',
+        
     }
+
 
 });

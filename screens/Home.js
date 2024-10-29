@@ -404,7 +404,7 @@ export default function Home({ navigation, route }) {
               <Text style={styles.text}>Collect Data</Text>
             </Pressable>}
 
-            {(collectData && setCamera) && <Pressable style={styles.button} onPress={() => { setCollectData(false); setSetCamera(false); }}>
+            {(collectData && setCamera) && <Pressable style={styles.button} onPress={() => { setCollectData(false) }}>
               <Text style={styles.text}>Stop Collection</Text>
             </Pressable>}
           </ScrollView>
@@ -414,10 +414,10 @@ export default function Home({ navigation, route }) {
               {...panResponder.panHandlers}
               style={[
                 styles.cameraContainer,
-                { transform: pan.getTranslateTransform() } // Apply the pan transform to the view
+                { transform: pan.getTranslateTransform() }
               ]}
             >
-              <MobileCam collectData={collectData} />
+              <MobileCam collectData={collectData} setSetCamera={setSetCamera} />
             </Animated.View>
           }
         </>

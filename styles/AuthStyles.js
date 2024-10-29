@@ -28,6 +28,15 @@ export const AuthStyles = StyleSheet.create({
         marginBottom: 20,
         backgroundColor: buttonForeground,
     },
+    profileImage: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        borderWidth: 1,
+        borderColor: foregroundColor1,
+        overflow: 'hidden',
+        
+    },
     icon: {
         marginBottom: 40,
         borderColor: foregroundColor1,
