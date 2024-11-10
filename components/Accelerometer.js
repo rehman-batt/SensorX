@@ -21,29 +21,40 @@ export default function Accelero({ delay, collectData, data }) {
 
     useFocusEffect(
         React.useCallback(() => {
+
             let isActive = true;
 
             (async () => {
-                let permissionStatus = await Accelerometer.requestPermissionsAsync();
-                if (permissionStatus.status !== 'granted') {
-                    setErrorMsg('Please provide permission to access Accelerometer');
-                    return;
-                } else {
-                    setStatus(true);
-                    setErrorMsg(null);
+                try {
+                    let permissionStatus = await Accelerometer.requestPermissionsAsync();
+                    if (permissionStatus.status !== 'granted') {
+                        setErrorMsg('Please provide permission to access Accelerometer');
+                        return;
+                    } else {
+                        setStatus(true);
+                        setErrorMsg(null);
 
-                    subscription.current = Accelerometer.addListener((accelerometerData) => {
-                        if (isActive) {
-                            
-                            setData(accelerometerData);
-                        }
-                    });
+                        subscription.current = Accelerometer.addListener((accelerometerData) => {
+                            try {
+                                if (isActive) {
+
+                                    setData(accelerometerData);
+                                }
+                            } catch (e) {
+                                setData({ x: 0, y: 0, z: 0 });
+                                setErrorMsg('An Error Occured while accessig Accelerometer Data');
+                            }
+
+                        });
+                    }
+                } catch (e) {
+                    setErrorMsg('An Error Occured while requesting Accelerometer permission');
                 }
             })();
 
             return () => {
                 isActive = false;
-                
+
                 if (subscription.current) {
                     // console.log('Accelerometer listener removed');
                     subscription.current.remove();

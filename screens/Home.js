@@ -250,6 +250,8 @@ import { useDrawerStatus } from '@react-navigation/drawer';
 import { FIREBASE_AUTH, db } from '../config/firebase.js';
 import { set, ref, onValue, push } from 'firebase/database';
 import MobileCam from '../components/MobileCam.js';
+import * as MediaLibrary from "expo-media-library";
+
 
 export default function Home({ navigation, route }) {
 
@@ -257,7 +259,22 @@ export default function Home({ navigation, route }) {
   const [setCamera, setSetCamera] = useState(false);
   const [delay, setDelay] = useState(200);
   const [loading, setLoading] = useState(false);
-  const pan = useRef(new Animated.ValueXY()).current; // Track the camera position
+  const [cameraPermissions, setCameraPermissions] = useState(false);
+  const pan = useRef(new Animated.ValueXY()).current;
+
+  const [hasMediaLibraryPermission, setHasMediaLibraryPermission] = useState();
+  
+  useEffect(() => {
+    (async () => {
+      try {
+      const mediaLibraryPermission = await MediaLibrary.requestPermissionsAsync();
+
+      setHasMediaLibraryPermission(mediaLibraryPermission.status === "granted");
+    } catch (error) {
+      console.error('Error Getting Library Permission:', error);
+    }
+    })();
+  }, []);
 
   const acceleroData = useRef({ x: [], y: [], z: [], timestamp: [] });
   const gyroData = useRef({ x: [], y: [], z: [], timestamp: [] });
@@ -340,6 +357,7 @@ export default function Home({ navigation, route }) {
       const userID = FIREBASE_AUTH.currentUser?.uid;
       if (userID) {
         const userRef = ref(db, `users/${userID}/rides`);
+        
         await push(userRef, dataToPush);
       }
     } catch (error) {
@@ -400,7 +418,7 @@ export default function Home({ navigation, route }) {
               <Text style={styles.text}>Set Camera</Text>
             </Pressable>}
 
-            {(!collectData && setCamera) && <Pressable style={styles.button} onPress={() => setCollectData(true)}>
+            {(!collectData && setCamera) && <Pressable style={cameraPermissions ? styles.button : styles.disabledButton} onPress={() => setCollectData(true)} disabled={!cameraPermissions}>
               <Text style={styles.text}>Collect Data</Text>
             </Pressable>}
 
@@ -417,7 +435,7 @@ export default function Home({ navigation, route }) {
                 { transform: pan.getTranslateTransform() }
               ]}
             >
-              <MobileCam collectData={collectData} setSetCamera={setSetCamera} />
+              <MobileCam collectData={collectData} setSetCamera={setSetCamera} setCameraPermissions={setCameraPermissions} hasMediaLibraryPermission={hasMediaLibraryPermission} />
             </Animated.View>
           }
         </>
@@ -439,15 +457,28 @@ const styles = StyleSheet.create({
     marginTop: '5%',
     alignItems: 'center',
     justifyContent: 'center',
-    width: '50%',
+    width: '55%',
     paddingVertical: 12,
     paddingHorizontal: 32,
     borderRadius: 20,
     elevation: 3,
     backgroundColor: buttonBackground,
   },
+
+  disabledButton: {
+    marginTop: '5%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '55%',
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 20,
+    elevation: 3,
+    backgroundColor: buttonBackground,
+    opacity: 0.7,
+  },
   text: {
-    fontSize: 16,
+    fontSize: 15,
     lineHeight: 21,
     fontWeight: 'bold',
     letterSpacing: 0.25,

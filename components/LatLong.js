@@ -18,33 +18,52 @@ export default function LatLong({ delay, collectData, data }) {
             let isActive = true;
 
             (async () => {
-                let permissionStatus = await Location.requestForegroundPermissionsAsync();
-                if (permissionStatus.status !== 'granted') {
-                    setErrorMsg('Please provide permission to access location');
-                    return;
-                } else { 
-                    setStatus(true);
-                    await Location.enableNetworkProviderAsync();
-                    setErrorMsg(null);
-
-                    locationWatcher.current = await Location.watchPositionAsync({
-                        accuracy: Location.Accuracy.High,
-                        timeInterval: delay,
-                        distanceInterval: 0,
-                    }, (location) => {
-                        if (isActive) {
-                            setLatitude(location.coords.latitude);
-                            setLongitude(location.coords.longitude);
-
-                            if (status && collectData) {
-                                data.current['lat'].push(location.coords.latitude);
-                                data.current['long'].push(location.coords.longitude);
-                                data.current['timestamp'].push(Date.now());
-                            }
+                try {
+                    let permissionStatus = await Location.requestForegroundPermissionsAsync();
+                    if (permissionStatus.status !== 'granted') {
+                        setErrorMsg('Please provide permission to access location');
+                        return;
+                    } else {
+                        setStatus(true);
+                        try {
+                            await Location.enableNetworkProviderAsync();
+                        } catch (e) {
+                            setErrorMsg('An error occurred while enabling network provider');
+                            return;
                         }
-                    });
+            
+                        setErrorMsg(null);
+            
+                        try {
+                            locationWatcher.current = await Location.watchPositionAsync({
+                                accuracy: Location.Accuracy.High,
+                                timeInterval: delay,
+                                distanceInterval: 0,
+                            }, (location) => {
+                                try {
+                                    if (isActive) {
+                                        setLatitude(location.coords.latitude);
+                                        setLongitude(location.coords.longitude);
+            
+                                        if (status && collectData) {
+                                            data.current['lat'].push(location.coords.latitude);
+                                            data.current['long'].push(location.coords.longitude);
+                                            data.current['timestamp'].push(Date.now());
+                                        }
+                                    }
+                                } catch (e) {
+                                    setErrorMsg('An error occurred while processing location data');
+                                }
+                            });
+                        } catch (e) {
+                            setErrorMsg('An error occurred while watching position');
+                        }
+                    }
+                } catch (e) {
+                    setErrorMsg('An error occurred while requesting location permission');
                 }
             })();
+            
 
             return () => {
                 isActive = false;

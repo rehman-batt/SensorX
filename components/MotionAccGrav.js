@@ -15,9 +15,9 @@ export default function MotionAccGrav({ delay, collectData, data }) {
         z: 0,
     });
     const subscription = useRef(null);
-    
-    if (collectData && status) {    
-       
+
+    if (collectData && status) {
+
         data.current['x'].push(x);
         data.current['y'].push(y);
         data.current['z'].push(z);
@@ -31,23 +31,33 @@ export default function MotionAccGrav({ delay, collectData, data }) {
             let isActive = true;
 
             (async () => {
-                let permissionStatus = await DeviceMotion.requestPermissionsAsync();
-                if (permissionStatus.status !== 'granted') {
-                    setErrorMsg('Please provide permission to access device motion');
-                    return;
-                } else {
-                    setStatus(true);
-                    setErrorMsg(null);
+                try {
+                    let permissionStatus = await DeviceMotion.requestPermissionsAsync();
+                    if (permissionStatus.status !== 'granted') {
+                        setErrorMsg('Please provide permission to access device motion');
+                        return;
+                    } else {
+                        setStatus(true);
+                        setErrorMsg(null);
 
-                    subscription.current = DeviceMotion.addListener(motionData => {
-                        if (isActive && motionData.acceleration) {
-                            setData(motionData.acceleration);
-                        } else {
-                            setData({ x: 0, y: 0, z: 0 });
-                        }
-                    });
+                        subscription.current = DeviceMotion.addListener(motionData => {
+                            try {
+                                if (isActive && motionData.acceleration) {
+                                    setData(motionData.acceleration);
+                                } else {
+                                    setData({ x: 0, y: 0, z: 0 });
+                                }
+                            } catch (e) {
+                                setData({ x: 0, y: 0, z: 0 });
+                                setErrorMsg('An error occurred while processing device motion data');
+                            }
+                        });
+                    }
+                } catch (e) {
+                    setErrorMsg('An error occurred while requesting device motion permission');
                 }
             })();
+
 
 
             return () => {

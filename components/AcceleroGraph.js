@@ -24,26 +24,38 @@ export default function AcceleroGraph({ }) {
             let isActive = true;
 
             (async () => {
-                let permissionStatus = await Accelerometer.requestPermissionsAsync();
-                if (permissionStatus.status !== 'granted') {
-                    setErrorMsg('Please provide permission to access Accelerometer');
-                    return;
-                } else {
-                    setStatus(true);
-                    setErrorMsg(null);
-
-                    subscription.current = Accelerometer.addListener(({ x, y, z }) => {
-                        if (isActive) {
-                            setAccelerometerData((prevData) => ({
-                                x: [...prevData.x.slice(-9), roundToTwoDecimals(x)],
-                                y: [...prevData.y.slice(-9), roundToTwoDecimals(y)],
-                                z: [...prevData.z.slice(-9), roundToTwoDecimals(z)],
-                            }));
+                try {
+                    let permissionStatus = await Accelerometer.requestPermissionsAsync();
+                    if (permissionStatus.status !== 'granted') {
+                        setErrorMsg('Please provide permission to access Accelerometer');
+                        return;
+                    } else {
+                        setStatus(true);
+                        setErrorMsg(null);
+            
+                        try {
+                            subscription.current = Accelerometer.addListener(({ x, y, z }) => {
+                                try {
+                                    if (isActive) {
+                                        setAccelerometerData((prevData) => ({
+                                            x: [...prevData.x.slice(-9), roundToTwoDecimals(x)],
+                                            y: [...prevData.y.slice(-9), roundToTwoDecimals(y)],
+                                            z: [...prevData.z.slice(-9), roundToTwoDecimals(z)],
+                                        }));
+                                    }
+                                } catch (e) {
+                                    setErrorMsg('An error occurred while processing accelerometer data');
+                                }
+                            });
+                        } catch (e) {
+                            setErrorMsg('An error occurred while starting accelerometer listener');
                         }
-
-                    });
+                    }
+                } catch (e) {
+                    setErrorMsg('An error occurred while requesting accelerometer permission');
                 }
             })();
+            
 
             return () => {
                 isActive = false;

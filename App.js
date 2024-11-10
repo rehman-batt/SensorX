@@ -12,7 +12,7 @@ import Login from './screens/Login';
 import Signup from './screens/Signup';
 // import MapScreen from './screens/Map'
 // import Icon from 'react-native-vector-icons/Entypo';
-import { StatusBar } from 'react-native';
+import { StatusBar, View, ActivityIndicator } from 'react-native';
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { FIREBASE_AUTH } from './config/firebase';
@@ -21,17 +21,32 @@ const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
 
 export default function App() {
-  const [user, SetUser] = useState(null);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
 
   useEffect(() => {
     onAuthStateChanged(FIREBASE_AUTH, (user) => {
-      SetUser(user);
+      setUser(user);
+      setLoading(false);
     })
   }, []);
-  
 
-  if (user) {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 1000); 
+
+    return () => clearTimeout(timer);
+  }, [])
+  
+  if (loading)
+  {
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: backgroundColor }}>
+        <ActivityIndicator color={foregroundColor1} size={60} />
+      </View>
+  }
+  else if (user) {
     return (
       
       <>

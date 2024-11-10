@@ -25,21 +25,31 @@ export default function MagnetUnc({ delay, collectData, data }) {
             let isActive = true;
 
             (async () => {
-                let permissionStatus = await MagnetometerUncalibrated.requestPermissionsAsync();
-                if (permissionStatus.status !== 'granted') {
-                    setErrorMsg('Please provide permission to access Magnetometer');
-                    return;
-                } else {
-                    setStatus(true);
-                    setErrorMsg(null);
-
-                    subscription.current = MagnetometerUncalibrated.addListener((magnetometerData) => {
-                        if (isActive) {
-                            setData(magnetometerData);
-                        }
-                    });
+                try {
+                    let permissionStatus = await MagnetometerUncalibrated.requestPermissionsAsync();
+                    if (permissionStatus.status !== 'granted') {
+                        setErrorMsg('Please provide permission to access Magnetometer');
+                        return;
+                    } else {
+                        setStatus(true);
+                        setErrorMsg(null);
+            
+                        subscription.current = MagnetometerUncalibrated.addListener((magnetometerData) => {
+                            try {
+                                if (isActive) {
+                                    setData(magnetometerData);
+                                }
+                            } catch (e) {
+                                setData({ x: 0, y: 0, z: 0 });
+                                setErrorMsg('An error occurred while accessing Magnetometer data');
+                            }
+                        });
+                    }
+                } catch (e) {
+                    setErrorMsg('An error occurred while requesting Magnetometer permission');
                 }
             })();
+            
 
             return () => {
                 isActive = false;

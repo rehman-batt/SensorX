@@ -24,26 +24,38 @@ export default function GyroGraph({ }) {
             let isActive = true;
 
             (async () => {
-                let permissionStatus = await Gyroscope.requestPermissionsAsync();
-                if (permissionStatus.status !== 'granted') {
-                    setErrorMsg('Please provide permission to access Gyroscope');
-                    return;
-                } else {
-                    setStatus(true);
-                    setErrorMsg(null);
+                try {
+                    let permissionStatus = await Gyroscope.requestPermissionsAsync();
+                    if (permissionStatus.status !== 'granted') {
+                        setErrorMsg('Please provide permission to access Gyroscope');
+                        return;
+                    } else {
+                        setStatus(true);
+                        setErrorMsg(null);
 
-                    subscription.current = Gyroscope.addListener(({ x, y, z }) => {
-                        if (isActive) {
-                            setGyroData((prevData) => ({
-                                x: [...prevData.x.slice(-9), roundToTwoDecimals(x)],
-                                y: [...prevData.y.slice(-9), roundToTwoDecimals(y)],
-                                z: [...prevData.z.slice(-9), roundToTwoDecimals(z)],
-                            }));
+                        try {
+                            subscription.current = Gyroscope.addListener(({ x, y, z }) => {
+                                try {
+                                    if (isActive) {
+                                        setGyroData((prevData) => ({
+                                            x: [...prevData.x.slice(-9), roundToTwoDecimals(x)],
+                                            y: [...prevData.y.slice(-9), roundToTwoDecimals(y)],
+                                            z: [...prevData.z.slice(-9), roundToTwoDecimals(z)],
+                                        }));
+                                    }
+                                } catch (e) {
+                                    setErrorMsg('An error occurred while processing gyroscope data');
+                                }
+                            });
+                        } catch (e) {
+                            setErrorMsg('An error occurred while starting gyroscope listener');
                         }
-
-                    });
+                    }
+                } catch (e) {
+                    setErrorMsg('An error occurred while requesting gyroscope permission');
                 }
             })();
+
 
             return () => {
                 isActive = false;

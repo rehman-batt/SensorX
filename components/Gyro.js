@@ -25,19 +25,28 @@ export default function Gyro({ delay, collectData, data }) {
             let isActive = true;
 
             (async () => {
-                let permissionStatus = await Gyroscope.requestPermissionsAsync();
-                if (permissionStatus.status !== 'granted') {
-                    setErrorMsg('Please provide permission to access Gyroscope');
-                    return;
-                } else {
-                    setStatus(true);
-                    setErrorMsg(null);
+                try {
+                    let permissionStatus = await Gyroscope.requestPermissionsAsync();
+                    if (permissionStatus.status !== 'granted') {
+                        setErrorMsg('Please provide permission to access Gyroscope');
+                        return;
+                    } else {
+                        setStatus(true);
+                        setErrorMsg(null);
 
-                    subscription.current = Gyroscope.addListener((gyroscopeData) => {
-                        if (isActive) {
-                            setData(gyroscopeData);
-                        }
-                    });
+                        subscription.current = Gyroscope.addListener((gyroscopeData) => {
+                            try {
+                                if (isActive) {
+                                    setData(gyroscopeData);
+                                }
+                            } catch (e) {
+                                setData({ x: 0, y: 0, z: 0 });
+                                setErrorMsg('An error occurred while accessing Gyroscope data');
+                            }
+                        });
+                    }
+                } catch (e) {
+                    setErrorMsg('An error occurred while requesting Gyroscope permission');
                 }
             })();
 

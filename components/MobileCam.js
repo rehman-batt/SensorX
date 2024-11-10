@@ -1,28 +1,120 @@
 import { CameraView, useCameraPermissions, useMicrophonePermissions } from 'expo-camera';
-import { StyleSheet, Pressable, View, Text } from 'react-native';
+import { StyleSheet, Pressable, View, Text, Linking, Alert, Platform } from 'react-native';
 import { camerBackground } from '../styles/SensorStyles';
 import { useState, useEffect, useRef } from 'react';
 import * as MediaLibrary from "expo-media-library";
+import * as Device from 'expo-device';
+import * as Notifications from 'expo-notifications';
+import Constants from 'expo-constants';
 
-export default function MobileCam({ collectData, setSetCamera }) {
-  const [permission, requestPermission] = useCameraPermissions();
-  const [mPermissions, useMPermissions] = useMicrophonePermissions();
-  const [hasMediaLibraryPermission, setHasMediaLibraryPermission] = useState();
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+  }),
+});
+
+export default function MobileCam({ collectData, setSetCamera, setCameraPermissions, hasMediaLibraryPermission }) {
+  const [permission, requestPermission, getPermission] = useCameraPermissions();
+  const [mPermissions, useMPermissions, getMPermissions] = useMicrophonePermissions();
   const [recording, setRecording] = useState(false);
   const cameraRef = useRef(null);
 
-  useEffect(() => {
-    (async () => {
-      const mediaLibraryPermission = await MediaLibrary.requestPermissionsAsync();
+  const [expoPushToken, setExpoPushToken] = useState('');
+  const [channels, setChannels] = useState([]);
+  const [notification, setNotification] = useState(
+    undefined
+  );
+  const notificationListener = useRef();
+  const responseListener = useRef();
 
-      setHasMediaLibraryPermission(mediaLibraryPermission.status === "granted");
-    })();
+  useEffect(() => {
+    registerForPushNotificationsAsync().then(token => token && setExpoPushToken(token));
+
+    if (Platform.OS === 'android') {
+      Notifications.getNotificationChannelsAsync().then(value => setChannels(value ?? []));
+    }
+    notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+      setNotification(notification);
+    });
+
+    responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+      console.log(response);
+    });
+
+    return () => {
+      notificationListener.current &&
+        Notifications.removeNotificationSubscription(notificationListener.current);
+      responseListener.current &&
+        Notifications.removeNotificationSubscription(responseListener.current);
+    };
   }, []);
 
 
+  async function schedulePushNotification() {
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: "Video Saved",
+        body: 'The Video has been saved to the RoadInSight Album in the Media Gallery',
+        
+      },
+      trigger: null,
+    });
+  }
+
+  async function registerForPushNotificationsAsync() {
+    let token;
+
+    if (Platform.OS === 'android') {
+      await Notifications.setNotificationChannelAsync('default', {
+        name: 'default',
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#FF231F7C',
+      });
+    }
+
+    if (Device.isDevice) {
+      const { status: existingStatus } = await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+      if (existingStatus !== 'granted') {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+      if (finalStatus !== 'granted') {
+        alert('Failed to get push token for push notification!');
+        Linking.openSettings();
+        
+        return;
+      }
+      // Learn more about projectId:
+      // https://docs.expo.dev/push-notifications/push-notifications-setup/#configure-projectid
+      // EAS projectId is used here.
+      try {
+        const projectId =
+          Constants?.expoConfig?.extra?.eas?.projectId ?? Constants?.easConfig?.projectId;
+        if (!projectId) {
+          throw new Error('Project ID not found');
+        }
+        token = (
+          await Notifications.getExpoPushTokenAsync({
+            projectId,
+          })
+        ).data;
+        console.log(token);
+      } catch (e) {
+        token = `${e}`;
+      }
+    } else {
+      alert('Must use physical device for Push Notifications');
+    }
+
+    return token;
+  }
 
   const videoRecording = async () => {
-    
+
     if (collectData && !recording && cameraRef.current) {
       setRecording(true);
 
@@ -36,15 +128,50 @@ export default function MobileCam({ collectData, setSetCamera }) {
         setRecording(false);
         try {
           console.log(video.uri);
-          await MediaLibrary.saveToLibraryAsync(video.uri);
-          
+
+          let album = await MediaLibrary.getAlbumAsync('RoadInSight');
+          let asset = await MediaLibrary.createAssetAsync(video.uri);
+
+          if (album == null) {
+            try {
+              const result = await MediaLibrary.createAlbumAsync('RoadInSight', asset, true);
+              if (result) {
+                await schedulePushNotification();
+                console.log('Asset added to album successfully.');
+              } else {
+                console.log('Failed to add asset to album.');
+              }
+            } catch (error) {
+              console.error('Error adding asset to album:', error);
+            }
+
+          } else {
+
+            try {
+              const result = await MediaLibrary.addAssetsToAlbumAsync(asset, album, true);
+              if (result) {
+                await schedulePushNotification();
+                console.log('Asset added to album successfully.');
+              } else {
+                console.log('Failed to add asset to album.');
+              }
+            } catch (error) {
+              console.error('Error adding asset to album:', error);
+            }
+
+          }
+
+
         } catch {
           console.error("Saving error:", error);
+          Alert.alert("Error", error.message || "An unknown error occurred");
+
         } finally {
           setSetCamera(false);
         }
       } catch (error) {
         console.error("Recording error:", error);
+        Alert.alert("Error", error.message || "An unknown error occurred");
       }
     } else if (!collectData && recording && cameraRef.current) {
       cameraRef.current.stopRecording();
@@ -56,6 +183,13 @@ export default function MobileCam({ collectData, setSetCamera }) {
     videoRecording();
   }, [collectData]);
 
+  useEffect(() => {
+    if (permission?.granted == true && mPermissions?.granted == true && hasMediaLibraryPermission) {
+      setCameraPermissions(permission && mPermissions && hasMediaLibraryPermission);
+    }
+  }, [permission, mPermissions, hasMediaLibraryPermission]);
+
+
   if ((!permission) || (!mPermissions)) {
     return <View />;
   }
@@ -63,7 +197,25 @@ export default function MobileCam({ collectData, setSetCamera }) {
   if ((!permission.granted) || (!mPermissions.granted)) {
     return (
       <View style={styles.container}>
-        <Pressable onPress={() => { requestPermission(); useMPermissions(); }} style={styles.button}>
+        <Pressable onPress={() => {
+
+          requestPermission();
+          useMPermissions();
+
+          if (!(permission?.granted == true && mPermissions?.granted == true && hasMediaLibraryPermission)) {
+            Alert.alert(
+              "Permissions Required",
+              "This app needs access to the camera, microphone, and gallery. Please grant these permissions to proceed.",
+              [
+                { text: "OK" },
+                { text: "Go to Settings", onPress: () => Linking.openSettings() },
+              ]
+            );
+
+          }
+
+
+        }} style={styles.button}>
           <Text style={styles.text}>GRANT</Text>
           <Text style={styles.text}>PERMISSION</Text>
         </Pressable>
@@ -101,12 +253,12 @@ const styles = StyleSheet.create({
   button: {
     alignItems: 'center',
     justifyContent: 'center',
-    width: '85%',
+    width: '90%',
     backgroundColor: '#2196F3',
     paddingVertical: 10,
   },
   text: {
     color: 'white',
-    fontSize: 17,
+    fontSize: 15,
   },
 });

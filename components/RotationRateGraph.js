@@ -24,27 +24,38 @@ export default function RotationRateGraph({ }) {
             let isActive = true;
         
             (async () => {
-                let permissionStatus = await DeviceMotion.requestPermissionsAsync();
-                if (permissionStatus.status !== 'granted') {
-                    setErrorMsg('Please provide permission to access DeviceMotion');
-                    return;
-                } else {
-                    setStatus(true);
-                    setErrorMsg(null);
-                    
-                    subscription.current = DeviceMotion.addListener(motionData => {
-                        if (isActive  && motionData.rotationRate) {
-                
-                            setRotationData((prevData) => ({
-                                alpha: [...prevData.alpha.slice(-9), roundToTwoDecimals(motionData.rotationRate.alpha)],
-                                beta: [...prevData.beta.slice(-9), roundToTwoDecimals(motionData.rotationRate.beta)],
-                                gamma: [...prevData.gamma.slice(-9), roundToTwoDecimals(motionData.rotationRate.gamma)],
-                            }));
+                try {
+                    let permissionStatus = await DeviceMotion.requestPermissionsAsync();
+                    if (permissionStatus.status !== 'granted') {
+                        setErrorMsg('Please provide permission to access DeviceMotion');
+                        return;
+                    } else {
+                        setStatus(true);
+                        setErrorMsg(null);
+            
+                        try {
+                            subscription.current = DeviceMotion.addListener(motionData => {
+                                try {
+                                    if (isActive && motionData.rotationRate) {
+                                        setRotationData((prevData) => ({
+                                            alpha: [...prevData.alpha.slice(-9), roundToTwoDecimals(motionData.rotationRate.alpha)],
+                                            beta: [...prevData.beta.slice(-9), roundToTwoDecimals(motionData.rotationRate.beta)],
+                                            gamma: [...prevData.gamma.slice(-9), roundToTwoDecimals(motionData.rotationRate.gamma)],
+                                        }));
+                                    }
+                                } catch (e) {
+                                    setErrorMsg('An error occurred while processing rotation data');
+                                }
+                            });
+                        } catch (e) {
+                            setErrorMsg('An error occurred while setting up DeviceMotion listener');
                         }
-
-                    });
+                    }
+                } catch (e) {
+                    setErrorMsg('An error occurred while requesting DeviceMotion permission');
                 }
             })();
+            
 
             return () => {
                 isActive = false;

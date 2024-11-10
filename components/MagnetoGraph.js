@@ -24,25 +24,38 @@ export default function MagnetoGraph({ }) {
             let isActive = true;
 
             (async () => {
-                let permissionStatus = await Magnetometer.requestPermissionsAsync();
-                if (permissionStatus.status !== 'granted') {
-                    setErrorMsg('Please provide permission to access Magnetometer');
-                    return;
-                } else {
-                    setStatus(true);
-                    setErrorMsg(null);
-                    subscription.current = Magnetometer.addListener(({ x, y, z }) => {
-                        if (isActive) {
-                            setmagnatoData((prevData) => ({
-                                x: [...prevData.x.slice(-9), roundToTwoDecimals(x)],
-                                y: [...prevData.y.slice(-9), roundToTwoDecimals(y)],
-                                z: [...prevData.z.slice(-9), roundToTwoDecimals(z)],
-                            }));
-                        }
+                try {
+                    let permissionStatus = await Magnetometer.requestPermissionsAsync();
+                    if (permissionStatus.status !== 'granted') {
+                        setErrorMsg('Please provide permission to access Magnetometer');
+                        return;
+                    } else {
+                        setStatus(true);
+                        setErrorMsg(null);
 
-                    });
+                        try {
+                            subscription.current = Magnetometer.addListener(({ x, y, z }) => {
+                                try {
+                                    if (isActive) {
+                                        setmagnatoData((prevData) => ({
+                                            x: [...prevData.x.slice(-9), roundToTwoDecimals(x)],
+                                            y: [...prevData.y.slice(-9), roundToTwoDecimals(y)],
+                                            z: [...prevData.z.slice(-9), roundToTwoDecimals(z)],
+                                        }));
+                                    }
+                                } catch (e) {
+                                    setErrorMsg('An error occurred while processing magnetometer data');
+                                }
+                            });
+                        } catch (e) {
+                            setErrorMsg('An error occurred while starting magnetometer listener');
+                        }
+                    }
+                } catch (e) {
+                    setErrorMsg('An error occurred while requesting magnetometer permission');
                 }
             })();
+
 
             return () => {
                 isActive = false;

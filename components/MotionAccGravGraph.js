@@ -24,27 +24,38 @@ export default function MotionAccGravGraph({ }) {
             let isActive = true;
 
             (async () => {
-                let permissionStatus = await DeviceMotion.requestPermissionsAsync();
-                if (permissionStatus.status !== 'granted') {
-                    setErrorMsg('Please provide permission to access DeviceMotion');
-                    return;
-                } else {
-                    setStatus(true);
-                    setErrorMsg(null);
-
-                    subscription.current = DeviceMotion.addListener(motionData => {
-                        if (isActive && motionData.accelerationIncludingGravity) {
-
-                            setMotionAccData((prevData) => ({
-                                x: [...prevData.x.slice(-9), roundToTwoDecimals(motionData.accelerationIncludingGravity.x)],
-                                y: [...prevData.y.slice(-9), roundToTwoDecimals(motionData.accelerationIncludingGravity.y)],
-                                z: [...prevData.z.slice(-9), roundToTwoDecimals(motionData.accelerationIncludingGravity.z)],
-                            }));
+                try {
+                    let permissionStatus = await DeviceMotion.requestPermissionsAsync();
+                    if (permissionStatus.status !== 'granted') {
+                        setErrorMsg('Please provide permission to access DeviceMotion');
+                        return;
+                    } else {
+                        setStatus(true);
+                        setErrorMsg(null);
+            
+                        try {
+                            subscription.current = DeviceMotion.addListener(motionData => {
+                                try {
+                                    if (isActive && motionData.accelerationIncludingGravity) {
+                                        setMotionAccData((prevData) => ({
+                                            x: [...prevData.x.slice(-9), roundToTwoDecimals(motionData.accelerationIncludingGravity.x)],
+                                            y: [...prevData.y.slice(-9), roundToTwoDecimals(motionData.accelerationIncludingGravity.y)],
+                                            z: [...prevData.z.slice(-9), roundToTwoDecimals(motionData.accelerationIncludingGravity.z)],
+                                        }));
+                                    }
+                                } catch (e) {
+                                    setErrorMsg('An error occurred while processing motion data');
+                                }
+                            });
+                        } catch (e) {
+                            setErrorMsg('An error occurred while starting DeviceMotion listener');
                         }
-
-                    });
+                    }
+                } catch (e) {
+                    setErrorMsg('An error occurred while requesting DeviceMotion permission');
                 }
             })();
+            
 
             return () => {
                 isActive = false;

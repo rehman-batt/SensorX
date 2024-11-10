@@ -24,26 +24,38 @@ export default function MagnetoUncGraph({ }) {
             let isActive = true;
 
             (async () => {
-                let permissionStatus = await MagnetometerUncalibrated.requestPermissionsAsync();
-                if (permissionStatus.status !== 'granted') {
-                    setErrorMsg('Please provide permission to access MagnetometerUncalibrated');
-                    return;
-                } else {
-                    setStatus(true);
-                    setErrorMsg(null);
+                try {
+                    let permissionStatus = await MagnetometerUncalibrated.requestPermissionsAsync();
+                    if (permissionStatus.status !== 'granted') {
+                        setErrorMsg('Please provide permission to access MagnetometerUncalibrated');
+                        return;
+                    } else {
+                        setStatus(true);
+                        setErrorMsg(null);
 
-                    subscription.current = MagnetometerUncalibrated.addListener(({ x, y, z }) => {
-                        if (isActive) {
-                            setmagnatoData((prevData) => ({
-                                x: [...prevData.x.slice(-9), roundToTwoDecimals(x)],
-                                y: [...prevData.y.slice(-9), roundToTwoDecimals(y)],
-                                z: [...prevData.z.slice(-9), roundToTwoDecimals(z)],
-                            }));
+                        try {
+                            subscription.current = MagnetometerUncalibrated.addListener(({ x, y, z }) => {
+                                try {
+                                    if (isActive) {
+                                        setmagnatoData((prevData) => ({
+                                            x: [...prevData.x.slice(-9), roundToTwoDecimals(x)],
+                                            y: [...prevData.y.slice(-9), roundToTwoDecimals(y)],
+                                            z: [...prevData.z.slice(-9), roundToTwoDecimals(z)],
+                                        }));
+                                    }
+                                } catch (e) {
+                                    setErrorMsg('An error occurred while processing MagnetometerUncalibrated data');
+                                }
+                            });
+                        } catch (e) {
+                            setErrorMsg('An error occurred while starting MagnetometerUncalibrated listener');
                         }
-
-                    });
+                    }
+                } catch (e) {
+                    setErrorMsg('An error occurred while requesting MagnetometerUncalibrated permission');
                 }
             })();
+
 
             return () => {
                 isActive = false;

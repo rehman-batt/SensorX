@@ -31,32 +31,43 @@ export default function Rotation({ delay, collectData, data }) {
         React.useCallback(() => {
             let isActive = true;
 
+            
             (async () => {
-                let permissionStatus = await DeviceMotion.requestPermissionsAsync();
-                if (permissionStatus.status !== 'granted') {
-                    setErrorMsg('Please provide permission to access device motion');
-                    return;
-                } else {
-                    setStatus(true);
-                    setErrorMsg(null);
-
-                    subscription.current = DeviceMotion.addListener(motionData => {
-
-                            if (motionData.rotation) {
-                                setData(motionData.rotation);
-
-                            } else {
+                try {
+                    let permissionStatus = await DeviceMotion.requestPermissionsAsync();
+                    if (permissionStatus.status !== 'granted') {
+                        setErrorMsg('Please provide permission to access device motion');
+                        return;
+                    } else {
+                        setStatus(true);
+                        setErrorMsg(null);
+            
+                        subscription.current = DeviceMotion.addListener(motionData => {
+                            try {
+                                if (motionData.rotation) {
+                                    setData(motionData.rotation);
+                                } else {
+                                    setData({
+                                        alpha: 0,
+                                        beta: 0,
+                                        gamma: 0,
+                                    });
+                                }
+                            } catch (e) {
                                 setData({
                                     alpha: 0,
                                     beta: 0,
                                     gamma: 0,
                                 });
-
+                                setErrorMsg('An error occurred while processing device motion data');
                             }
                         });
-                   
+                    }
+                } catch (e) {
+                    setErrorMsg('An error occurred while requesting device motion permission');
                 }
             })();
+            
 
             return () => {
                 isActive = false;
