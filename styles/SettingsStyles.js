@@ -73,7 +73,7 @@ export const SettingsStyles = StyleSheet.create({
     },
     pickerContainer: {
         width: '100%',
-        height: 50,
+        height: 55,
         borderColor: foregroundColor1,
         borderWidth: 1,
         marginBottom: 10,

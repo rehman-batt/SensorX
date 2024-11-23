@@ -176,7 +176,7 @@
 //             <MobileCam collectData={collectData} />
 //           </View>}
 
-          
+
 
 
 //         </>
@@ -260,19 +260,18 @@ export default function Home({ navigation, route }) {
   const [delay, setDelay] = useState(200);
   const [loading, setLoading] = useState(false);
   const [cameraPermissions, setCameraPermissions] = useState(false);
-  const pan = useRef(new Animated.ValueXY()).current;
 
   const [hasMediaLibraryPermission, setHasMediaLibraryPermission] = useState();
-  
+
   useEffect(() => {
     (async () => {
       try {
-      const mediaLibraryPermission = await MediaLibrary.requestPermissionsAsync();
+        const mediaLibraryPermission = await MediaLibrary.requestPermissionsAsync();
 
-      setHasMediaLibraryPermission(mediaLibraryPermission.status === "granted");
-    } catch (error) {
-      console.error('Error Getting Library Permission:', error);
-    }
+        setHasMediaLibraryPermission(mediaLibraryPermission.status === "granted");
+      } catch (error) {
+        console.error('Error Getting Library Permission:', error);
+      }
     })();
   }, []);
 
@@ -285,28 +284,6 @@ export default function Home({ navigation, route }) {
   const rotationData = useRef({ alpha: [], beta: [], gamma: [], timestamp: [] });
   const rotationRateData = useRef({ alpha: [], beta: [], gamma: [], timestamp: [] });
   const latLongData = useRef({ lat: [], long: [], timestamp: [] });
-
-  const panResponder = useRef(
-    PanResponder.create({
-      onMoveShouldSetPanResponder: () => true,
-      onPanResponderGrant: () => {
-        pan.setOffset({
-          x: pan.x._value,
-          y: pan.y._value,
-        });
-      },
-      onPanResponderMove: Animated.event(
-        [
-          null,
-          { dx: pan.x, dy: pan.y },
-        ],
-        { useNativeDriver: false }
-      ),
-      onPanResponderRelease: () => {
-        pan.flattenOffset(); 
-      },
-    })
-  ).current;
 
   const getSampleRate = async () => {
     const userID = FIREBASE_AUTH.currentUser?.uid;
@@ -357,7 +334,7 @@ export default function Home({ navigation, route }) {
       const userID = FIREBASE_AUTH.currentUser?.uid;
       if (userID) {
         const userRef = ref(db, `users/${userID}/rides`);
-        
+
         await push(userRef, dataToPush);
       }
     } catch (error) {
@@ -427,17 +404,9 @@ export default function Home({ navigation, route }) {
             </Pressable>}
           </ScrollView>
 
-          {setCamera &&
-            <Animated.View
-              {...panResponder.panHandlers}
-              style={[
-                styles.cameraContainer,
-                { transform: pan.getTranslateTransform() }
-              ]}
-            >
-              <MobileCam collectData={collectData} setSetCamera={setSetCamera} setCameraPermissions={setCameraPermissions} hasMediaLibraryPermission={hasMediaLibraryPermission} />
-            </Animated.View>
-          }
+          {setCamera && <View style={styles.cameraContainer}>
+            <MobileCam collectData={collectData} setSetCamera={setSetCamera} setCameraPermissions={setCameraPermissions} hasMediaLibraryPermission={hasMediaLibraryPermission} />
+          </View>}
         </>
       }
 
@@ -491,5 +460,7 @@ const styles = StyleSheet.create({
     width: '30%',
     height: 200,
     backgroundColor: 'transparent',
+    flex: 1,
   }
+
 });

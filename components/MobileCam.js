@@ -1,11 +1,14 @@
 import { CameraView, useCameraPermissions, useMicrophonePermissions } from 'expo-camera';
 import { StyleSheet, Pressable, View, Text, Linking, Alert, Platform } from 'react-native';
 import { camerBackground } from '../styles/SensorStyles';
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import * as MediaLibrary from "expo-media-library";
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
+import { useFocusEffect } from '@react-navigation/native';
+import { FIREBASE_AUTH, db } from '../config/firebase.js';
+import { ref, push } from 'firebase/database';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -57,7 +60,7 @@ export default function MobileCam({ collectData, setSetCamera, setCameraPermissi
       content: {
         title: "Video Saved",
         body: 'The Video has been saved to the RoadInSight Album in the Media Gallery',
-        
+
       },
       trigger: null,
     });
@@ -85,7 +88,7 @@ export default function MobileCam({ collectData, setSetCamera, setCameraPermissi
       if (finalStatus !== 'granted') {
         alert('Failed to get push token for push notification!');
         Linking.openSettings();
-        
+
         return;
       }
       // Learn more about projectId:
@@ -126,6 +129,7 @@ export default function MobileCam({ collectData, setSetCamera, setCameraPermissi
       try {
         const video = await cameraRef.current.recordAsync(options);
         setRecording(false);
+        setSetCamera(false);
         try {
           console.log(video.uri);
 
@@ -152,6 +156,20 @@ export default function MobileCam({ collectData, setSetCamera, setCameraPermissi
               if (result) {
                 await schedulePushNotification();
                 console.log('Asset added to album successfully.');
+
+                try {
+                  const userID = FIREBASE_AUTH.currentUser?.uid;
+                  if (userID) {
+                    const userRef = ref(db, `users/${userID}/videos`);
+                    const parts = video.uri.split("/");
+                    const fileName = parts[parts.length - 1];
+                    await push(userRef, fileName);
+                  }
+                } catch (error) {
+                  console.log("Error Setting Data: ", error);
+                  Alert.alert('Data Setting Error', error);
+                }
+
               } else {
                 console.log('Failed to add asset to album.');
               }
@@ -166,9 +184,7 @@ export default function MobileCam({ collectData, setSetCamera, setCameraPermissi
           console.error("Saving error:", error);
           Alert.alert("Error", error.message || "An unknown error occurred");
 
-        } finally {
-          setSetCamera(false);
-        }
+        } 
       } catch (error) {
         console.error("Recording error:", error);
         Alert.alert("Error", error.message || "An unknown error occurred");
@@ -183,11 +199,14 @@ export default function MobileCam({ collectData, setSetCamera, setCameraPermissi
     videoRecording();
   }, [collectData]);
 
-  useEffect(() => {
-    if (permission?.granted == true && mPermissions?.granted == true && hasMediaLibraryPermission) {
-      setCameraPermissions(permission && mPermissions && hasMediaLibraryPermission);
-    }
-  }, [permission, mPermissions, hasMediaLibraryPermission]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      if (permission?.granted == true && mPermissions?.granted == true && hasMediaLibraryPermission) {
+        setCameraPermissions(permission && mPermissions && hasMediaLibraryPermission);
+      }
+    }, [permission, mPermissions, hasMediaLibraryPermission])
+  );
 
 
   if ((!permission) || (!mPermissions)) {
@@ -197,25 +216,30 @@ export default function MobileCam({ collectData, setSetCamera, setCameraPermissi
   if ((!permission.granted) || (!mPermissions.granted)) {
     return (
       <View style={styles.container}>
-        <Pressable onPress={() => {
+        <Pressable
+          onPress={async () => {
+            try {
+              const camPermission = await requestPermission();
+              const micPermission = await useMPermissions();
+              if (camPermission.granted && micPermission.granted && hasMediaLibraryPermission) {
+                setCameraPermissions(true);
+              } else {
+                Alert.alert(
+                  "Permissions Required",
+                  "This app needs access to the camera, microphone, and gallery. Please grant these permissions to proceed.",
+                  [
+                    { text: "Go to Settings", onPress: () => Linking.openSettings() },
+                    { text: "Cancel" },
+                  ]
+                );
+              }
+            } catch (error) {
+              console.error("Permission error:", error);
+            }
+          }}
+          style={styles.button}
+        >
 
-          requestPermission();
-          useMPermissions();
-
-          if (!(permission?.granted == true && mPermissions?.granted == true && hasMediaLibraryPermission)) {
-            Alert.alert(
-              "Permissions Required",
-              "This app needs access to the camera, microphone, and gallery. Please grant these permissions to proceed.",
-              [
-                { text: "OK" },
-                { text: "Go to Settings", onPress: () => Linking.openSettings() },
-              ]
-            );
-
-          }
-
-
-        }} style={styles.button}>
           <Text style={styles.text}>GRANT</Text>
           <Text style={styles.text}>PERMISSION</Text>
         </Pressable>
