@@ -1,7 +1,7 @@
 import { Text, View, TouchableOpacity, Alert, ActivityIndicator, ScrollView, Image, ImageBackground } from 'react-native';
 import { useState, useEffect } from 'react';
 import * as ImagePicker from 'expo-image-picker';
-import { FIREBASE_AUTH, db, storage } from '../config/firebase';
+import { FIREBASE_AUTH, db } from '../config/firebase';
 import { backgroundColor, foregroundColor1 } from '../styles/SensorStyles';
 import { SettingsStyles, deleteButtonColor } from '../styles/SettingsStyles';
 import { Picker } from '@react-native-picker/picker';
@@ -9,9 +9,19 @@ import Slider from '@react-native-community/slider';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Icon2 from 'react-native-vector-icons/AntDesign';
 import { carNames } from '../data/Cars';
-import { set, ref, onValue } from 'firebase/database';
+import { set, ref } from 'firebase/database';
 import { getDownloadURL, uploadBytes, getStorage, ref as storageRef, deleteObject } from 'firebase/storage';
 import { useDrawerStatus } from '@react-navigation/drawer';
+import { firebase } from '@react-native-firebase/database';
+// import database from '@react-native-firebase/database';
+// import {API_KEY, authDomain, projectId, storageBucket, messagingSenderId, appId, measurementId, DB_URL} from '@env';
+
+
+// database().setPersistenceEnabled(true);
+// database().setPersistenceCacheSizeBytes(100000000);
+
+
+
 
 
 export default function Settings() {
@@ -32,13 +42,16 @@ export default function Settings() {
 
     const getUserData = async () => {
         const userID = FIREBASE_AUTH.currentUser?.uid;
+
         if (userID) {
             try {
                 setDataLoading(true);
-
-                const userRef = await ref(db, 'users/' + userID);
-
-                await onValue(userRef, (snapshot) => {
+                
+                firebase
+                .app()
+                .database('https://roadinsight-fyp-default-rtdb.asia-southeast1.firebasedatabase.app/')
+                .ref('users/' + userID)
+                .on('value', snapshot => {
                     if (snapshot.exists()) {
                         const userData = snapshot.val();
                         setSelectedCar(userData.car || 'None');
@@ -51,11 +64,32 @@ export default function Settings() {
                     } else {
                         console.log("No user data found");
                     }
-                })
+                });
+                
+               
+
+                // const userRef = await ref(db, 'users/' + userID);
+
+                // await onValue(userRef, (snapshot) => {
+                //     if (snapshot.exists()) {
+                //         const userData = snapshot.val();
+                //         setSelectedCar(userData.car || 'None');
+                //         setMakeYear(userData.makeYear || 'None');
+                //         setCondition(userData.condition || 0);
+                //         setDelay(userData.sampleRate || 200);
+                //         if (userData.profilePictureUrl) {
+                //             setProfilePicture(userData.profilePictureUrl);
+                //         }
+                //     } else {
+                //         console.log("No user data found");
+                //     }
+                // })
+
+               
 
             } catch (error) {
-                console.log("Error fetching user data: ", error);
-                Alert.alert('Data Fetching Error', error);
+                console.log("Error fetching user data: ", error?.message);
+                Alert.alert('Data Fetching Error', error?.message);
             } finally {
 
                 setDataLoading(false);
@@ -135,7 +169,7 @@ export default function Settings() {
                             });
 
                         } catch (error) {
-                            console.log('Error removing profile picture: ', error);
+                            console.log('Error removing profile picture: ', error?.message);
                             Alert.alert('Error', 'Failed to remove the profile picture. Please try again.');
                         } finally {
                             setUploading(false);
@@ -200,7 +234,7 @@ export default function Settings() {
             setProfilePicture(downloadUrl);
             Alert.alert("Profile picture updated successfully");
         } catch (error) {
-            console.log("Error uploading profile picture: ", error);
+            console.log("Error uploading profile picture: ", error?.message);
             Alert.alert("Error", "Failed to upload profile picture. Please try again.");
         } finally {
             setUploading(false);
@@ -225,7 +259,7 @@ export default function Settings() {
                         try {
                             await FIREBASE_AUTH.currentUser.delete();
                         } catch (error) {
-                            console.log(error);
+                            console.log(error?.message);
                             Alert.alert("Error while deleting user. Please try again later");
                         } finally {
                             setLoading(false);
@@ -253,7 +287,7 @@ export default function Settings() {
 
             });
         } catch (firestoreError) {
-            console.error('Error saving user data to Firestore:', firestoreError);
+            console.error('Error saving user data to Firestore:', firestoreError?.message);
             Alert.alert('Data Save Error', 'Failed to save user information. Please try again.');
         };
     }
@@ -284,7 +318,7 @@ export default function Settings() {
                                 <ImageBackground source={require('../assets/user.png')} style={{ flex: 1, justifyContent: 'flex-end', alignItems: 'center' }}>
 
                                     <View style={{ opacity: 0.7, borderRadius: 15, backgroundColor: 'gray', width: '100%', alignItems: 'center' }}>
-                                        <Icon name="photo-camera" size={20} color="white"   />
+                                        <Icon name="photo-camera" size={20} color="white" />
                                     </View>
 
                                 </ImageBackground>

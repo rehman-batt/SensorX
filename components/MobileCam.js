@@ -8,7 +8,7 @@ import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
 import { useFocusEffect } from '@react-navigation/native';
 import { FIREBASE_AUTH, db } from '../config/firebase.js';
-import { ref, push } from 'firebase/database';
+import { firebase } from '@react-native-firebase/database';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -160,10 +160,15 @@ export default function MobileCam({ collectData, setSetCamera, setCameraPermissi
                 try {
                   const userID = FIREBASE_AUTH.currentUser?.uid;
                   if (userID) {
-                    const userRef = ref(db, `users/${userID}/videos`);
+
                     const parts = video.uri.split("/");
                     const fileName = parts[parts.length - 1];
-                    await push(userRef, fileName);
+
+                    const newReference = firebase.app().database('https://roadinsight-fyp-default-rtdb.asia-southeast1.firebasedatabase.app/').ref(`users/${userID}/videos`).push();
+
+                    newReference
+                      .set(fileName)
+                      .then(() => console.log('Data updated.'));
                   }
                 } catch (error) {
                   console.log("Error Setting Data: ", error);
@@ -184,7 +189,7 @@ export default function MobileCam({ collectData, setSetCamera, setCameraPermissi
           console.error("Saving error:", error);
           Alert.alert("Error", error.message || "An unknown error occurred");
 
-        } 
+        }
       } catch (error) {
         console.error("Recording error:", error);
         Alert.alert("Error", error.message || "An unknown error occurred");

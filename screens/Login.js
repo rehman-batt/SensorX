@@ -10,7 +10,7 @@ export default function Login({ navigation }) {
     const [loading, setLoading] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
+    const [showPassword, setShowPassword] = useState(false); 
     const auth = FIREBASE_AUTH;
 
     const validateInput = () => {
