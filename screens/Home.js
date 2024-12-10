@@ -15,6 +15,8 @@ import { useDrawerStatus } from '@react-navigation/drawer';
 import { FIREBASE_AUTH } from '../config/firebase.js';
 import MobileCam from '../components/MobileCam.js';
 import * as MediaLibrary from "expo-media-library";
+
+// uncomment
 import { firebase } from '@react-native-firebase/database';
 
 
@@ -56,6 +58,7 @@ export default function Home({ }) {
       try {
         setLoading(true);
 
+        // uncomment
         firebase.app().database('https://roadinsight-fyp-default-rtdb.asia-southeast1.firebasedatabase.app/')
           .ref('users/' + userID)
           .on('value', snapshot => {
@@ -66,6 +69,9 @@ export default function Home({ }) {
               console.log("No user data found");
             }
           });
+
+
+
 
         // const userRef = ref(db, 'users/' + userID);
 
@@ -119,6 +125,7 @@ export default function Home({ }) {
       // }
       if (userID) {
 
+        // uncomment
         const newReference = firebase.app().database('https://roadinsight-fyp-default-rtdb.asia-southeast1.firebasedatabase.app/').ref(`users/${userID}/rides`).push();
 
         newReference

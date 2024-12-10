@@ -164,6 +164,8 @@ export default function MobileCam({ collectData, setSetCamera, setCameraPermissi
                     const parts = video.uri.split("/");
                     const fileName = parts[parts.length - 1];
 
+
+                    // uncomment
                     const newReference = firebase.app().database('https://roadinsight-fyp-default-rtdb.asia-southeast1.firebasedatabase.app/').ref(`users/${userID}/videos`).push();
 
                     newReference

@@ -12,13 +12,9 @@ import { carNames } from '../data/Cars';
 import { set, ref } from 'firebase/database';
 import { getDownloadURL, uploadBytes, getStorage, ref as storageRef, deleteObject } from 'firebase/storage';
 import { useDrawerStatus } from '@react-navigation/drawer';
+
+// uncomment
 import { firebase } from '@react-native-firebase/database';
-// import database from '@react-native-firebase/database';
-// import {API_KEY, authDomain, projectId, storageBucket, messagingSenderId, appId, measurementId, DB_URL} from '@env';
-
-
-// database().setPersistenceEnabled(true);
-// database().setPersistenceCacheSizeBytes(100000000);
 
 
 
@@ -47,6 +43,7 @@ export default function Settings() {
             try {
                 setDataLoading(true);
                 
+                // uncomment
                 firebase
                 .app()
                 .database('https://roadinsight-fyp-default-rtdb.asia-southeast1.firebasedatabase.app/')
@@ -67,6 +64,8 @@ export default function Settings() {
                 });
                 
                
+
+
 
                 // const userRef = await ref(db, 'users/' + userID);
 

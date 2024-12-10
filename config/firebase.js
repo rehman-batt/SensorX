@@ -4,13 +4,10 @@ import { initializeAuth, getReactNativePersistence } from 'firebase/auth';
 import {API_KEY, authDomain, projectId, storageBucket, messagingSenderId, appId, measurementId, DB_URL} from '@env';
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 import { getDatabase } from 'firebase/database';
-// import { firebase } from '@react-native-firebase/database';
-import database from '@react-native-firebase/database';
 
-// const reference = firebase
-//   .app()
-//   .database('https://roadinsight-fyp-default-rtdb.asia-southeast1.firebasedatabase.app/')
-//   .ref('/users');
+
+// uncomment
+import database from '@react-native-firebase/database';
 
 
 
@@ -21,7 +18,8 @@ import database from '@react-native-firebase/database';
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 
-database().setPersistenceEnabled(true);
+// uncomment
+// database().setPersistenceEnabled(true);
 database().setPersistenceCacheSizeBytes(100000000);
 
 const firebaseConfig = {
