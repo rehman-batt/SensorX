@@ -40,7 +40,7 @@ export default function Magnet({ delay, collectData, data }) {
                                     setData(magnetometerData);
                                 }
                             } catch (e) {
-                                setData({ x: 0, y: 0, z: 0 });
+                                
                                 setErrorMsg('An error occurred while accessing Magnetometer data');
                             }
                         });

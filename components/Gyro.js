@@ -40,7 +40,7 @@ export default function Gyro({ delay, collectData, data }) {
                                     setData(gyroscopeData);
                                 }
                             } catch (e) {
-                                setData({ x: 0, y: 0, z: 0 });
+                                
                                 setErrorMsg('An error occurred while accessing Gyroscope data');
                             }
                         });

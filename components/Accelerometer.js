@@ -41,7 +41,7 @@ export default function Accelero({ delay, collectData, data }) {
                                     setData(accelerometerData);
                                 }
                             } catch (e) {
-                                setData({ x: 0, y: 0, z: 0 });
+                                
                                 setErrorMsg('An Error Occured while accessig Accelerometer Data');
                             }
 
