@@ -46,19 +46,9 @@ export default function Rotation({ delay, collectData, data }) {
                             try {
                                 if (motionData.rotation) {
                                     setData(motionData.rotation);
-                                } else {
-                                    setData({
-                                        alpha: 0,
-                                        beta: 0,
-                                        gamma: 0,
-                                    });
-                                }
+                                } 
                             } catch (e) {
-                                setData({
-                                    alpha: 0,
-                                    beta: 0,
-                                    gamma: 0,
-                                });
+                                
                                 setErrorMsg('An error occurred while processing device motion data');
                             }
                         });

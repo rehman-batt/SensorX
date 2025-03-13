@@ -8,6 +8,7 @@ import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
 import { useFocusEffect } from '@react-navigation/native';
 import { FIREBASE_AUTH, db } from '../config/firebase.js';
+import { Svg, Line, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { firebase } from '@react-native-firebase/database';
 
 Notifications.setNotificationHandler({
@@ -258,6 +259,20 @@ export default function MobileCam({ collectData, setSetCamera, setCameraPermissi
   return (
     <View style={styles.cameraContainer}>
       <CameraView mode="video" style={styles.camera} type={'back'} ref={cameraRef} />
+      <Svg style={styles.overlay} height="100%" width="100%">
+      
+        <Defs>
+          <LinearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
+
+          <Stop offset="100%" stopColor="red" stopOpacity="0.4" />
+            <Stop offset="50%" stopColor="green" stopOpacity="0.4" />
+            <Stop offset="0%" stopColor="yellow" stopOpacity="0.4" />
+            
+          </LinearGradient>
+        </Defs>
+        <Line x1="10%" y1="20%" x2="10%" y2="80%" stroke="url(#grad)" strokeWidth="10" />
+        <Line x1="90%" y1="20%" x2="90%" y2="80%" stroke="url(#grad)" strokeWidth="10" />
+      </Svg>
     </View>
   );
 }
@@ -276,6 +291,12 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     borderRadius: 10,
     alignItems: 'center',
+  },
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+
   },
   camera: {
     width: '100%',

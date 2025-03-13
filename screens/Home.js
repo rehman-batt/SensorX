@@ -50,7 +50,7 @@ export default function Home({ }) {
   const motionAccGravData = useRef({ x: [], y: [], z: [], timestamp: [] });
   const rotationData = useRef({ alpha: [], beta: [], gamma: [], timestamp: [] });
   const rotationRateData = useRef({ alpha: [], beta: [], gamma: [], timestamp: [] });
-  const latLongData = useRef({ lat: [], long: [], timestamp: [] });
+  const latLongData = useRef({ lat: [], long: [], alt: [], timestamp: [], speed: [], accuracy: [], distance: 0 });
 
   const getSampleRate = async () => {
     const userID = FIREBASE_AUTH.currentUser?.uid;
@@ -70,24 +70,8 @@ export default function Home({ }) {
             }
           });
 
-
-
-
-        // const userRef = ref(db, 'users/' + userID);
-
-        // onValue(userRef, (snapshot) => {
-        //   if (snapshot.exists()) {
-        //     const userData = snapshot.val();
-        //     setDelay(userData.sampleRate || 200);
-        //   } else {
-        //     console.log("No user data found");
-        //   }
-        // });
-
-
       } catch (error) {
         console.log("Error fetching user data: ", error?.message);
-        // Alert.alert('Data Fetching Error', error.message);
         setDelay(200);
       } finally {
         setLoading(false);
@@ -118,12 +102,9 @@ export default function Home({ }) {
 
       const userID = FIREBASE_AUTH.currentUser?.uid;
 
-      // if (userID) {
-      //   const userRef = ref(db, `users/${userID}/rides`);
-
-      //   await push(userRef, dataToPush);
-      // }
       if (userID) {
+
+        // ##Dashboard Stats
 
         // uncomment
         const newReference = firebase.app().database('https://roadinsight-fyp-default-rtdb.asia-southeast1.firebasedatabase.app/').ref(`users/${userID}/rides`).push();
@@ -152,7 +133,7 @@ export default function Home({ }) {
     motionAccGravData.current = { x: [], y: [], z: [], timestamp: [] };
     rotationData.current = { alpha: [], beta: [], gamma: [], timestamp: [] };
     rotationRateData.current = { alpha: [], beta: [], gamma: [], timestamp: [] };
-    latLongData.current = { lat: [], long: [], timestamp: [] };
+    latLongData.current = { lat: [], long: [], alt: [], timestamp: [], speed: [], accuracy: [], distance: 0 };
   };
 
   useEffect(() => {

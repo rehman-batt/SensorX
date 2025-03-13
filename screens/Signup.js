@@ -8,7 +8,7 @@ import { AuthStyles } from '../styles/AuthStyles';
 import { foregroundColor1, foregroundColor2 } from '../styles/SensorStyles';
 import { FIREBASE_AUTH, db } from '../config/firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { ref, set } from 'firebase/database';
+import { ref, set, runTransaction } from 'firebase/database';
 import { carNames } from '../data/Cars';
 import { getDownloadURL, uploadBytes, getStorage, ref as storageRef } from 'firebase/storage';
 
@@ -53,6 +53,12 @@ export default function Signup({ navigation }) {
             const response = await createUserWithEmailAndPassword(auth, email, password);
             const user = response.user;
             const userRef = ref(db, 'users/' + user.uid);
+
+            const totalUsersRef = ref(db, 'totalUsers/');
+
+            runTransaction(totalUsersRef, (currentValue) => {
+                return (currentValue || 0) + 1;
+            });
             
             
             if (profilePicture) {
@@ -74,7 +80,7 @@ export default function Signup({ navigation }) {
                     car: selectedCar,
                     makeYear: makeYear,
                     condition: condition,
-                    sampleRate: 200,
+                    sampleRate: 400,
                     profilePictureUrl: downloadUrl
                     
     
@@ -85,7 +91,7 @@ export default function Signup({ navigation }) {
                     car: selectedCar,
                     makeYear: makeYear,
                     condition: condition,
-                    sampleRate: 200,
+                    sampleRate: 400,
     
                 });
             }

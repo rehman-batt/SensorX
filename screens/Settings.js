@@ -27,7 +27,7 @@ export default function Settings() {
     const [selectedCar, setSelectedCar] = useState('None');
     const [makeYear, setMakeYear] = useState('None');
     const [condition, setCondition] = useState(0);
-    const [delay, setDelay] = useState(200);
+    const [delay, setDelay] = useState(400);
     const [profilePicture, setProfilePicture] = useState(null);
     const [uploading, setUploading] = useState(false);
 
@@ -54,7 +54,7 @@ export default function Settings() {
                         setSelectedCar(userData.car || 'None');
                         setMakeYear(userData.makeYear || 'None');
                         setCondition(userData.condition || 0);
-                        setDelay(userData.sampleRate || 200);
+                        setDelay(userData.sampleRate || 400);
                         if (userData.profilePictureUrl) {
                             setProfilePicture(userData.profilePictureUrl);
                         }
@@ -63,26 +63,7 @@ export default function Settings() {
                     }
                 });
                 
-               
-
-
-
-                // const userRef = await ref(db, 'users/' + userID);
-
-                // await onValue(userRef, (snapshot) => {
-                //     if (snapshot.exists()) {
-                //         const userData = snapshot.val();
-                //         setSelectedCar(userData.car || 'None');
-                //         setMakeYear(userData.makeYear || 'None');
-                //         setCondition(userData.condition || 0);
-                //         setDelay(userData.sampleRate || 200);
-                //         if (userData.profilePictureUrl) {
-                //             setProfilePicture(userData.profilePictureUrl);
-                //         }
-                //     } else {
-                //         console.log("No user data found");
-                //     }
-                // })
+            
 
                
 
@@ -373,10 +354,10 @@ export default function Settings() {
                                 </View>
 
                                 <View style={SettingsStyles.sliderContainer}>
-                                    <Text style={SettingsStyles.sliderLabel}>Sampling Rate: {delay}</Text>
+                                    <Text style={SettingsStyles.sliderLabel}>Sampling Rate: {delay}ms</Text>
                                     <Slider
                                         style={SettingsStyles.slider}
-                                        minimumValue={100}
+                                        minimumValue={400}
                                         maximumValue={15000}
                                         minimumTrackTintColor={foregroundColor1}
                                         maximumTrackTintColor="#000000"

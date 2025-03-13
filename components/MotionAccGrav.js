@@ -44,11 +44,9 @@ export default function MotionAccGrav({ delay, collectData, data }) {
                             try {
                                 if (isActive && motionData.acceleration) {
                                     setData(motionData.acceleration);
-                                } else {
-                                    setData({ x: 0, y: 0, z: 0 });
-                                }
+                                } 
                             } catch (e) {
-                                setData({ x: 0, y: 0, z: 0 });
+                                
                                 setErrorMsg('An error occurred while processing device motion data');
                             }
                         });

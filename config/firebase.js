@@ -19,7 +19,7 @@ import database from '@react-native-firebase/database';
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 
 // uncomment
-// database().setPersistenceEnabled(true);
+database().setPersistenceEnabled(true);
 database().setPersistenceCacheSizeBytes(100000000);
 
 
