@@ -138,7 +138,7 @@ export default function MobileCam({ collectData, setSetCamera, setCameraPermissi
 
           if (album == null) {
             try {
-              const result = await MediaLibrary.createAlbumAsync('RoadInSight', asset, true);
+              const result = await MediaLibrary.createAlbumAsync('RoadInSight', asset, false);
               if (result) {
                 await schedulePushNotification();
                 console.log('Asset added to album successfully.');
@@ -152,7 +152,7 @@ export default function MobileCam({ collectData, setSetCamera, setCameraPermissi
           } else {
 
             try {
-              const result = await MediaLibrary.addAssetsToAlbumAsync(asset, album, true);
+              const result = await MediaLibrary.addAssetsToAlbumAsync(asset, album, false);
               if (result) {
                 await schedulePushNotification();
                 console.log('Asset added to album successfully.');
@@ -199,6 +199,7 @@ export default function MobileCam({ collectData, setSetCamera, setCameraPermissi
     } else if (!collectData && recording && cameraRef.current) {
       cameraRef.current.stopRecording();
       setRecording(false);
+      setSetCamera(false); 
     }
   };
 

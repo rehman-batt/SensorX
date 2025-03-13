@@ -22,6 +22,9 @@ import database from '@react-native-firebase/database';
 // database().setPersistenceEnabled(true);
 database().setPersistenceCacheSizeBytes(100000000);
 
+
+console.log(API_KEY);
+
 const firebaseConfig = {
   apiKey: API_KEY,
   authDomain: authDomain,
