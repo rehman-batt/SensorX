@@ -9,8 +9,9 @@ export default function LatLong({ delay, collectData, data }) {
 
     const [errorMsg, setErrorMsg] = useState('Please provide permission to access location');
     const [status, setStatus] = useState(false);
-    const [latitude, setLatitude] = useState(null);
-    const [longitude, setLongitude] = useState(null);
+    
+    const [location, setLocation] = useState({ latitude: null, longitude: null, altitude: 0, speed: 0 });
+
     const locationWatcher = useRef(null);
 
     useFocusEffect(
@@ -36,30 +37,40 @@ export default function LatLong({ delay, collectData, data }) {
             
                         try {
                             locationWatcher.current = await Location.watchPositionAsync({
-                                accuracy: Location.Accuracy.High,
-                                timeInterval: delay,
+                                accuracy: Location.Accuracy.BestForNavigation,
+                                timeInterval: parseInt(delay/2),
                                 distanceInterval: 0,
-                            }, (location) => {
+                            }, (loc) => {
                                 try {
                                     if (isActive) {
-                                        setLatitude(location.coords.latitude);
-                                        setLongitude(location.coords.longitude);
+                                        const { latitude, longitude, altitude, speed, altitudeAccuracy } = loc.coords;
+
+                                        setLocation({ latitude, longitude, altitude, speed });
             
                                         if (status && collectData) {
-                                            data.current['lat'].push(location.coords.latitude);
-                                            data.current['long'].push(location.coords.longitude);
-                                            data.current['timestamp'].push(Date.now());
+
+                                            const { lat, long, alt, timestamp, speed: spd, accuracy, distance } = data.current;
+                                            
+                                            lat.push(latitude);
+                                            long.push(longitude);
+                                            timestamp.push(Date.now());
+                                            spd.push(speed);
+                                            alt.push(altitude);
+                                            accuracy.push(altitudeAccuracy);
                                         }
                                     }
                                 } catch (e) {
+                                    console.log(e);
                                     setErrorMsg('An error occurred while processing location data');
                                 }
                             });
                         } catch (e) {
+                            console.log(e);
                             setErrorMsg('An error occurred while watching position');
                         }
                     }
                 } catch (e) {
+                    console.log(e);
                     setErrorMsg('An error occurred while requesting location permission');
                 }
             })();
@@ -67,10 +78,7 @@ export default function LatLong({ delay, collectData, data }) {
 
             return () => {
                 isActive = false;
-                if (locationWatcher.current) {
-                    // console.log('Location Watcher Removed');
-                    locationWatcher.current.remove();
-                }
+                locationWatcher.current?.remove();
             };
         }, [delay, collectData, status])
     );
@@ -94,7 +102,7 @@ export default function LatLong({ delay, collectData, data }) {
                                 <Text style={styles.valueTitle}>Latitude</Text>
                                 <View style={styles.flexRowUtility}>
                                     <Text style={styles.latLongValue}>
-                                        {latitude}
+                                        {location.latitude}
                                     </Text>
                                     <Text style={styles.unit}>deg</Text>
                                 </View>
@@ -103,9 +111,28 @@ export default function LatLong({ delay, collectData, data }) {
                                 <Text style={styles.valueTitle}>Longitude</Text>
                                 <View style={styles.flexRowUtility}>
                                     <Text style={styles.latLongValue}>
-                                        {longitude}
+                                        {location.longitude}
                                     </Text>
                                     <Text style={styles.unit}>deg</Text>
+                                </View>
+                            </View>
+                            <View>
+                                <Text style={styles.valueTitle}>Altitude</Text>
+                                <View style={styles.flexRowUtility}>
+                                    <Text style={styles.latLongValue}>
+                                        {(location.altitude ?? 0).toFixed(2)}
+
+                                    </Text>
+                                    <Text style={styles.unit}>m</Text>
+                                </View>
+                            </View>
+                            <View>
+                                <Text style={styles.valueTitle}>Speed</Text>
+                                <View style={styles.flexRowUtility}>
+                                    <Text style={styles.latLongValue}>
+                                        {(location.speed ?? 0).toFixed(2)}
+                                    </Text>
+                                    <Text style={styles.unit}>m/s</Text>
                                 </View>
                             </View>
                         </View>
