@@ -12,7 +12,8 @@ import Rotation from '../components/Rotation.js';
 import RotationRate from '../components/RotationRate.js';
 import MagnetUnc from '../components/MagnetometerUncalibrated.js';
 import { useDrawerStatus } from '@react-navigation/drawer';
-import { FIREBASE_AUTH } from '../config/firebase.js';
+import { FIREBASE_AUTH, db } from '../config/firebase.js';
+import { ref, runTransaction } from 'firebase/database';
 import MobileCam from '../components/MobileCam.js';
 import * as MediaLibrary from "expo-media-library";
 
@@ -97,24 +98,69 @@ export default function Home({ }) {
         'Motion Acceleration with Gravity': motionAccGravData.current,
         'Rotation': rotationData.current,
         'Rotation Rate': rotationRateData.current,
-        'Latitude and Longitude': latLongData.current
+        'Latitude and Longitude': latLongData.current,
+        'processed1': false,
+        'processed2': false,
       };
 
       const userID = FIREBASE_AUTH.currentUser?.uid;
 
       if (userID) {
 
-        // ##Dashboard Stats
+        const distanceTravelled = parseFloat(dataToPush['Latitude and Longitude']['distance']);
+        const acceleroDataLength = dataToPush['Accelerometer']['timestamp'].length;
+
+        let totalTime = 0;
+
+        if (acceleroDataLength > 1) {
+          totalTime = parseFloat(
+            dataToPush['Accelerometer']['timestamp'][acceleroDataLength - 1] -
+            dataToPush['Accelerometer']['timestamp'][0]);
+        }
+
+        dataToPush['time'] = totalTime;
+
+        console.log('Updating distance by:', distanceTravelled);
+        console.log('Updating time by:', totalTime);
+
+        const totalDistanceRef = ref(db, 'distance/');
+
+        runTransaction(totalDistanceRef, (currentValue) => {
+          return (currentValue || 0) + distanceTravelled;
+        });
+
+
+        const userTotalDistanceRef = ref(db, `users/${userID}/distance/`);
+
+        runTransaction(userTotalDistanceRef, (currentValue) => {
+          return (currentValue || 0) + distanceTravelled;
+        });
+
+        const totalTimeRef = ref(db, 'time/');
+
+        runTransaction(totalTimeRef, (currentValue) => {
+          return (currentValue || 0) + totalTime;
+        });
+
+
+        const userTotalTimeRef = ref(db, `users/${userID}/time/`);
+
+        runTransaction(userTotalTimeRef, (currentValue) => {
+          return (currentValue || 0) + totalTime;
+        });
+
 
         // uncomment
-        const newReference = firebase.app().database('https://roadinsight-fyp-default-rtdb.asia-southeast1.firebasedatabase.app/').ref(`users/${userID}/rides`).push();
+        const newReference = firebase
+          .app()
+          .database('https://roadinsight-fyp-default-rtdb.asia-southeast1.firebasedatabase.app/').ref(`/users/${userID}/rides`).push();
 
         newReference
           .set(dataToPush)
           .then(() => console.log('Data updated.'));
       }
 
-      
+
     } catch (error) {
       console.log("Error Setting Data: ", error?.message);
       Alert.alert('Data Setting Error', error?.message);
