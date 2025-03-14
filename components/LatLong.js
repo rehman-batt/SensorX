@@ -4,6 +4,7 @@ import React from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { styles } from '../styles/SensorStyles';
 import * as Location from 'expo-location';
+import haversine from 'haversine';
 
 export default function LatLong({ delay, collectData, data }) {
 
@@ -57,6 +58,16 @@ export default function LatLong({ delay, collectData, data }) {
                                             spd.push(speed);
                                             alt.push(altitude);
                                             accuracy.push(altitudeAccuracy);
+
+                                            if (lat.length > 1) {
+                                                const prevIndex = lat.length - 2;
+                                                const lastIndex = lat.length - 1;
+
+                                                const start = { latitude: lat[prevIndex], longitude: long[prevIndex] };
+                                                const end = { latitude: lat[lastIndex], longitude: long[lastIndex] };
+
+                                                data.current.distance += haversine(start, end, { unit: 'meter' });
+                                            }
                                         }
                                     }
                                 } catch (e) {

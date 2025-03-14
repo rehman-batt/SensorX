@@ -23,6 +23,7 @@ import { firebase } from '@react-native-firebase/database';
 export default function Settings() {
 
     const [loading, setLoading] = useState(false);
+    const [userEmail, setUserEmail] = useState('--');
     const [dataLoading, setDataLoading] = useState(false);
     const [selectedCar, setSelectedCar] = useState('None');
     const [makeYear, setMakeYear] = useState('None');
@@ -55,6 +56,7 @@ export default function Settings() {
                         setMakeYear(userData.makeYear || 'None');
                         setCondition(userData.condition || 0);
                         setDelay(userData.sampleRate || 400);
+                        setUserEmail(userData.email);
                         if (userData.profilePictureUrl) {
                             setProfilePicture(userData.profilePictureUrl);
                         }
@@ -313,7 +315,10 @@ export default function Settings() {
                     <View style={SettingsStyles.userDataContainer}>
                         {!dataLoading &&
                             <>
-                                <Text style={SettingsStyles.carDataTitle}>Car Data</Text>
+                                <Text style={SettingsStyles.carDataTitle}>User Data</Text>
+                                <View style={SettingsStyles.pickerContainer}>
+                                    <Text style={{padding: 6}}>{userEmail}</Text>
+                                </View>
                                 <View style={SettingsStyles.pickerContainer}>
                                     <Picker
                                         selectedValue={selectedCar}
