@@ -10,7 +10,8 @@ import Settings from './screens/Settings';
 import Viz from './screens/Viz';
 import Login from './screens/Login';
 import Signup from './screens/Signup';
-import MapScreen from './screens/Map'
+import MapScreen from './screens/Map';
+import Dashboard from './screens/Dashboard';
 // import Icon from 'react-native-vector-icons/Entypo';
 import { StatusBar, View, ActivityIndicator } from 'react-native';
 import { useEffect, useState } from 'react';
@@ -86,7 +87,7 @@ export default function App() {
             <Drawer.Screen name="Elevation Map" component={MapScreen} />
             <Drawer.Screen name="Data Collection" component={Home} />
             <Drawer.Screen name="Data Visualization" component={Viz} />
-            <Drawer.Screen name="Dashboard" component={UC} />
+            <Drawer.Screen name="Dashboard" component={Dashboard} />
             <Drawer.Screen name="Settings" component={Settings} />
           </Drawer.Navigator>
         </NavigationContainer>
