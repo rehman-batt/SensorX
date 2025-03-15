@@ -6,6 +6,7 @@ import { foregroundColor1, buttonForeground, backgroundColor } from './styles/Se
 // import { Pressable } from 'react-native';
 import Home from './screens/Home';
 import UC from './screens/UnderConstruction';
+import Recordings from './screens/Recordings';
 import Settings from './screens/Settings';
 import Viz from './screens/Viz';
 import Login from './screens/Login';
@@ -87,6 +88,7 @@ export default function App() {
             <Drawer.Screen name="Elevation Map" component={MapScreen} />
             <Drawer.Screen name="Data Collection" component={Home} />
             <Drawer.Screen name="Data Visualization" component={Viz} />
+            <Drawer.Screen name="Recordings" component={Recordings} />
             <Drawer.Screen name="Dashboard" component={Dashboard} />
             <Drawer.Screen name="Settings" component={Settings} />
           </Drawer.Navigator>
