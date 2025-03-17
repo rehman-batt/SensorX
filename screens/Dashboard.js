@@ -25,34 +25,77 @@ const Dashboard = () => {
     useEffect(() => {
         const fetchDashboardData = async () => {
             try {
+                // const userID = FIREBASE_AUTH.currentUser?.uid;
+
+                // const db = firebase.app().database('https://roadinsight-fyp-default-rtdb.asia-southeast1.firebasedatabase.app/');
+
+                // const [
+                //     usersSnap,
+                //     userTimeSnap,
+                //     totalTimeSnap,
+                //     userDistanceSnap,
+                //     totalDistanceSnap
+                // ] = await Promise.all([
+                //     db.ref('totalUsers').get(),
+                //     db.ref(`users/${userID}/time`).get(),
+                //     db.ref('time').get(),
+                //     db.ref(`users/${userID}/distance`).get(),
+                //     db.ref('distance').get(),
+                // ]);
+
+                // setTotalUsers(usersSnap.exists() ? usersSnap.val() : 'N/A');
+                // setUserTime(userTimeSnap.exists() ? convertMsToTime(userTimeSnap.val()) : 'N/A');
+                // setTotalTime(totalTimeSnap.exists() ? convertMsToTime(totalTimeSnap.val()) : 'N/A');
+                // setAvgTime(usersSnap.exists() && totalTimeSnap.exists() ?
+                //     convertMsToTime(parseInt(totalTimeSnap.val() / usersSnap.val())) : 'N/A');
+
+                // setUserDistance(userDistanceSnap.exists() ? (userDistanceSnap.val() / 1000).toFixed(5) : 'N/A');
+                // setTotalDistance(totalDistanceSnap.exists() ? (totalDistanceSnap.val() / 1000).toFixed(5) : 'N/A');
+                // setAvgDistance(usersSnap.exists() && totalDistanceSnap.exists() ?
+                //     ((totalDistanceSnap.val() / usersSnap.val()) / 1000).toFixed(5) : 'N/A');
+
                 const userID = FIREBASE_AUTH.currentUser?.uid;
 
                 const db = firebase.app().database('https://roadinsight-fyp-default-rtdb.asia-southeast1.firebasedatabase.app/');
 
-                const [
-                    usersSnap,
-                    userTimeSnap,
-                    totalTimeSnap,
-                    userDistanceSnap,
-                    totalDistanceSnap
-                ] = await Promise.all([
-                    db.ref('totalUsers').once('value'),
-                    db.ref(`users/${userID}/time`).once('value'),
-                    db.ref('time').once('value'),
-                    db.ref(`users/${userID}/distance/`).once('value'),
-                    db.ref('distance/').once('value'),
-                ]);
+                const updateValues = (snapshot, setState, transform = (val) => val) => {
+                    setState(snapshot.exists() ? transform(snapshot.val()) : 'N/A');
+                };
 
-                setTotalUsers(usersSnap.exists() ? usersSnap.val() : 'N/A');
-                setUserTime(userTimeSnap.exists() ? convertMsToTime(userTimeSnap.val()) : 'N/A');
-                setTotalTime(totalTimeSnap.exists() ? convertMsToTime(totalTimeSnap.val()) : 'N/A');
-                setAvgTime(usersSnap.exists() && totalTimeSnap.exists() ?
-                    convertMsToTime(parseInt(totalTimeSnap.val() / usersSnap.val())) : 'N/A');
-                    
-                setUserDistance(userDistanceSnap.exists() ? (userDistanceSnap.val() / 1000).toFixed(5) : 'N/A');
-                setTotalDistance(totalDistanceSnap.exists() ? (totalDistanceSnap.val() / 1000).toFixed(5) : 'N/A');
-                setAvgDistance(usersSnap.exists() && totalDistanceSnap.exists() ?
-                    ((totalDistanceSnap.val() / usersSnap.val()) / 1000).toFixed(5) : 'N/A');
+                // Set up listeners
+                db.ref('totalUsers').on('value', (snapshot) => updateValues(snapshot, setTotalUsers));
+
+                db.ref(`users/${userID}/time`).on('value', (snapshot) => updateValues(snapshot, setUserTime, convertMsToTime));
+
+                db.ref('time').on('value', (snapshot) => updateValues(snapshot, setTotalTime, convertMsToTime));
+
+                db.ref(`users/${userID}/distance`).on('value', (snapshot) =>
+                    updateValues(snapshot, setUserDistance, (val) => (val / 1000).toFixed(5))
+                );
+
+                db.ref('distance').on('value', (snapshot) =>
+                    updateValues(snapshot, setTotalDistance, (val) => (val / 1000).toFixed(5))
+                );
+
+                // Compute average time and distance dynamically
+                db.ref('totalUsers').on('value', (usersSnap) => {
+                    db.ref('time').on('value', (totalTimeSnap) => {
+                        setAvgTime(
+                            usersSnap.exists() && totalTimeSnap.exists()
+                                ? convertMsToTime(parseInt(totalTimeSnap.val() / usersSnap.val()))
+                                : 'N/A'
+                        );
+                    });
+
+                    db.ref('distance').on('value', (totalDistanceSnap) => {
+                        setAvgDistance(
+                            usersSnap.exists() && totalDistanceSnap.exists()
+                                ? ((totalDistanceSnap.val() / usersSnap.val()) / 1000).toFixed(5)
+                                : 'N/A'
+                        );
+                    });
+                });
+
             } catch (error) {
                 console.error('Error fetching dashboard data:', error);
             } finally {
