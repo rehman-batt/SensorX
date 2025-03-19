@@ -27,7 +27,7 @@ const Dashboard = () => {
             try {
                 // const userID = FIREBASE_AUTH.currentUser?.uid;
 
-                // const db = firebase.app().database('https://roadinsight-fyp-default-rtdb.asia-southeast1.firebasedatabase.app/');
+                // const db = firebase.app().database('https://roadinsight-default-rtdb.asia-southeast1.firebasedatabase.app/');
 
                 // const [
                 //     usersSnap,
@@ -56,7 +56,7 @@ const Dashboard = () => {
 
                 const userID = FIREBASE_AUTH.currentUser?.uid;
 
-                const db = firebase.app().database('https://roadinsight-fyp-default-rtdb.asia-southeast1.firebasedatabase.app/');
+                const db = firebase.app().database('https://roadinsight-default-rtdb.asia-southeast1.firebasedatabase.app/');
 
                 const updateValues = (snapshot, setState, transform = (val) => val) => {
                     setState(snapshot.exists() ? transform(snapshot.val()) : 'N/A');

@@ -80,7 +80,7 @@ export default function Signup({ navigation }) {
                     car: selectedCar,
                     makeYear: makeYear,
                     condition: condition,
-                    sampleRate: 400,
+                    sampleRate: 1000,
                     profilePictureUrl: downloadUrl
                     
     
@@ -91,7 +91,7 @@ export default function Signup({ navigation }) {
                     car: selectedCar,
                     makeYear: makeYear,
                     condition: condition,
-                    sampleRate: 400,
+                    sampleRate: 1000,
     
                 });
             }

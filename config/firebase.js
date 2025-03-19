@@ -11,7 +11,7 @@ import database from '@react-native-firebase/database';
 
 
 
-// const reference = firebase.app().database('https://roadinsight-fyp-default-rtdb.asia-southeast1.firebasedatabase.app/')
+// const reference = firebase.app().database('https://roadinsight-default-rtdb.asia-southeast1.firebasedatabase.app/')
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -22,8 +22,6 @@ import database from '@react-native-firebase/database';
 database().setPersistenceEnabled(true);
 database().setPersistenceCacheSizeBytes(100000000);
 
-
-console.log(API_KEY);
 
 const firebaseConfig = {
   apiKey: API_KEY,

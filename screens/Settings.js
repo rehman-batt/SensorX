@@ -28,7 +28,7 @@ export default function Settings() {
     const [selectedCar, setSelectedCar] = useState('None');
     const [makeYear, setMakeYear] = useState('None');
     const [condition, setCondition] = useState(0);
-    const [delay, setDelay] = useState(400);
+    const [delay, setDelay] = useState(1000);
     const [profilePicture, setProfilePicture] = useState(null);
     const [uploading, setUploading] = useState(false);
 
@@ -47,7 +47,7 @@ export default function Settings() {
                 // uncomment
                 firebase
                 .app()
-                .database('https://roadinsight-fyp-default-rtdb.asia-southeast1.firebasedatabase.app/')
+                .database('https://roadinsight-default-rtdb.asia-southeast1.firebasedatabase.app/')
                 .ref('users/' + userID)
                 .on('value', snapshot => {
                     if (snapshot.exists()) {
@@ -55,7 +55,7 @@ export default function Settings() {
                         setSelectedCar(userData.car || 'None');
                         setMakeYear(userData.makeYear || 'None');
                         setCondition(userData.condition || 0);
-                        setDelay(userData.sampleRate || 400);
+                        setDelay(userData.sampleRate || 1000);
                         setUserEmail(userData.email);
                         if (userData.profilePictureUrl) {
                             setProfilePicture(userData.profilePictureUrl);
@@ -362,7 +362,7 @@ export default function Settings() {
                                     <Text style={SettingsStyles.sliderLabel}>Sampling Rate: {delay}ms</Text>
                                     <Slider
                                         style={SettingsStyles.slider}
-                                        minimumValue={400}
+                                        minimumValue={1000}
                                         maximumValue={15000}
                                         minimumTrackTintColor={foregroundColor1}
                                         maximumTrackTintColor="#000000"

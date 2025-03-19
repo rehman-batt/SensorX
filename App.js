@@ -13,6 +13,7 @@ import Login from './screens/Login';
 import Signup from './screens/Signup';
 import MapScreen from './screens/Map';
 import Dashboard from './screens/Dashboard';
+import ElevationMap from './screens/ElevationMap';
 // import Icon from 'react-native-vector-icons/Entypo';
 import { StatusBar, View, ActivityIndicator } from 'react-native';
 import { useEffect, useState } from 'react';
@@ -85,7 +86,7 @@ export default function App() {
             headerTintColor: buttonForeground,
           }}>
             <Drawer.Screen name="Road Condition Map" component={MapScreen} />
-            <Drawer.Screen name="Elevation Map" component={MapScreen} />
+            <Drawer.Screen name="Elevation Map" component={ElevationMap} />
             <Drawer.Screen name="Data Collection" component={Home} />
             <Drawer.Screen name="Data Visualization" component={Viz} />
             <Drawer.Screen name="Recordings" component={Recordings} />

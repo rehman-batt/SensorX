@@ -25,7 +25,7 @@ export default function Home({ }) {
 
   const [collectData, setCollectData] = useState(false);
   const [setCamera, setSetCamera] = useState(false);
-  const [delay, setDelay] = useState(200);
+  const [delay, setDelay] = useState(1000);
   const [loading, setLoading] = useState(false);
   const [cameraPermissions, setCameraPermissions] = useState(false);
 
@@ -60,12 +60,12 @@ export default function Home({ }) {
         setLoading(true);
 
         // uncomment
-        firebase.app().database('https://roadinsight-fyp-default-rtdb.asia-southeast1.firebasedatabase.app/')
+        firebase.app().database('https://roadinsight-default-rtdb.asia-southeast1.firebasedatabase.app/')
           .ref('users/' + userID)
           .on('value', snapshot => {
             if (snapshot.exists()) {
               const userData = snapshot.val();
-              setDelay(userData.sampleRate || 200);
+              setDelay(userData.sampleRate || 1000);
             } else {
               console.log("No user data found");
             }
@@ -73,7 +73,7 @@ export default function Home({ }) {
 
       } catch (error) {
         console.log("Error fetching user data: ", error?.message);
-        setDelay(200);
+        setDelay(1000);
       } finally {
         setLoading(false);
       }
@@ -153,7 +153,7 @@ export default function Home({ }) {
         // uncomment
         const newReference = firebase
           .app()
-          .database('https://roadinsight-fyp-default-rtdb.asia-southeast1.firebasedatabase.app/').ref(`/users/${userID}/rides`).push();
+          .database('https://roadinsight-default-rtdb.asia-southeast1.firebasedatabase.app/').ref(`/users/${userID}/rides`).push();
 
         newReference
           .set(dataToPush)

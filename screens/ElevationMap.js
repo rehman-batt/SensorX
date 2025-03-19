@@ -4,7 +4,7 @@ import MapView, { Circle } from "react-native-maps";
 import { firebase } from "@react-native-firebase/database";
 import { geohashQueryBounds, distanceBetween } from "geofire-common";
 
-const MapScreen = () => {
+const ElevationMap = () => {
   const [slopeData, setSlopeData] = useState([]);
   const [region, setRegion] = useState({
     latitude: 33.656463,
@@ -116,4 +116,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MapScreen;
+export default ElevationMap;
