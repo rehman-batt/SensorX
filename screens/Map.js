@@ -1,16 +1,17 @@
 import React, { useState, useRef } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import MapView, { Circle } from "react-native-maps";
 import { firebase } from "@react-native-firebase/database";
 import { geohashQueryBounds, distanceBetween } from "geofire-common";
 
 const MapScreen = () => {
-  const [slopeData, setSlopeData] = useState([]);
+  const [conditionData, setConditionData] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [region, setRegion] = useState({
     latitude: 33.656463,
     longitude: 73.015318,
-    latitudeDelta: 0.01,  
-    longitudeDelta: 0.01,
+    latitudeDelta: 0.02,
+    longitudeDelta: 0.02,
   });
 
   const mapRef = useRef(null);
@@ -18,25 +19,27 @@ const MapScreen = () => {
   // Function to calculate dynamic search radius
   const getSearchRadius = (latitudeDelta) => {
     // Approximate search radius based on zoom level (latitudeDelta)
-    return Math.min(1000, Math.max(500, latitudeDelta * 2500)); 
+    // Math.min(200000, Math.max(1000, latitudeDelta * 50000));
+    return Math.min(120000, Math.max(6000, latitudeDelta * 22000));
     // Min 500m when zoomed in, Max 1km when zoomed out
   };
 
 
   // Fetch slope data based on map center & zoom level
-  const fetchSlopeData = async () => {
+  const fetchConditionData = async () => {
+    setLoading(true);
     const searchRadius = getSearchRadius(region.latitudeDelta);
     console.log(`Fetching data within ${searchRadius} meters`);
 
     try {
       const bounds = geohashQueryBounds([region.latitude, region.longitude], searchRadius);
-      let slopeResults = [];
+      let conditionResults = [];
 
       const promises = bounds.map(([start, end]) => {
         return firebase
           .app()
           .database("https://roadinsight-default-rtdb.asia-southeast1.firebasedatabase.app/")
-          .ref("slopes")
+          .ref("conditions2")
           .orderByChild("geohash")
           .startAt(start)
           .endAt(end)
@@ -48,20 +51,22 @@ const MapScreen = () => {
       snapshots.forEach((snapshot) => {
         if (snapshot.exists()) {
           snapshot.forEach((child) => {
-            const slope = child.val();
-            const distance = distanceBetween([region.latitude, region.longitude], [slope.lat, slope.long]);
+            const condition = child.val();
+            const distance = distanceBetween([region.latitude, region.longitude], [condition.lat, condition.long]);
 
             if (distance <= searchRadius) {
-              slopeResults.push(slope);
+              conditionResults.push(condition);
             }
           });
         }
       });
 
-      console.log("Points Checked:", slopeResults.length);
-      setSlopeData(slopeResults);
+      console.log("Points Checked:", conditionResults.length);
+      setConditionData(conditionResults);
     } catch (error) {
-      console.error("Error fetching slope data:", error);
+      console.error("Error fetching condition data:", error);
+    } finally {
+      setLoading(false);  // Stop loading
     }
   };
 
@@ -77,23 +82,31 @@ const MapScreen = () => {
         style={{ flex: 1 }}
         initialRegion={region}
         onRegionChangeComplete={onRegionChangeComplete}
+        maxZoomLevel={20}
       >
-        {slopeData.map((slope, index) => (
+        {conditionData.map((condition, index) => (
           <Circle
             key={index}
-            center={{ latitude: slope.lat, longitude: slope.long }}
+            center={{ latitude: condition.lat, longitude: condition.long }}
             radius={10}
             strokeWidth={1}
-            strokeColor={slope.color}
-            fillColor={`${slope.color}80`}
+            strokeColor={condition.color}
+            fillColor={`${condition.color}80`}
           />
         ))}
       </MapView>
 
+      {loading && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0e4c92" style={{ transform: [{ scale: 1.5 }] }} />
+        </View>
+      )}
+
       {/* Styled Button */}
-      <TouchableOpacity style={styles.button} onPress={fetchSlopeData}>
-        <Text style={styles.buttonText}>Fetch Slopes for This Area</Text>
+      <TouchableOpacity style={styles.button} onPress={fetchConditionData}>
+        <Text style={styles.buttonText}>{loading ? "Fetching..." : "Fetch Conditions for This Area"}</Text>
       </TouchableOpacity>
+
     </View>
   );
 };
@@ -113,6 +126,12 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  loadingContainer: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.3)",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 

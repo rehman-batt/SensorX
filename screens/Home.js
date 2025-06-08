@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { StyleSheet, View, Text, Pressable, ScrollView, ActivityIndicator, Alert, PanResponder, Animated } from 'react-native';
+import { StyleSheet, View, Text, Pressable, ScrollView, ActivityIndicator, Alert, PanResponder, Animated, Platform } from 'react-native';
 import { buttonBackground, buttonForeground, foregroundColor1 } from '../styles/SensorStyles.js';
 import { useState, useEffect } from 'react';
 import Gyro from '../components/Gyro.js';
@@ -17,9 +17,20 @@ import { ref, runTransaction } from 'firebase/database';
 import MobileCam from '../components/MobileCam.js';
 import * as MediaLibrary from "expo-media-library";
 
+import * as Device from 'expo-device';
+import * as Notifications from 'expo-notifications';
+import Constants from 'expo-constants';
+
 // uncomment
 import { firebase } from '@react-native-firebase/database';
 
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+  }),
+});
 
 export default function Home({ }) {
 
@@ -30,6 +41,98 @@ export default function Home({ }) {
   const [cameraPermissions, setCameraPermissions] = useState(false);
 
   const [hasMediaLibraryPermission, setHasMediaLibraryPermission] = useState();
+
+  const [expoPushToken, setExpoPushToken] = useState('');
+  const [channels, setChannels] = useState([]);
+  const [notification, setNotification] = useState(
+    undefined
+  );
+  const notificationListener = useRef();
+  const responseListener = useRef();
+
+  useEffect(() => {
+    registerForPushNotificationsAsync().then(token => token && setExpoPushToken(token));
+
+    if (Platform.OS === 'android') {
+      Notifications.getNotificationChannelsAsync().then(value => setChannels(value ?? []));
+    }
+    notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+      setNotification(notification);
+    });
+
+    responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+      console.log(response);
+    });
+
+    return () => {
+      notificationListener.current &&
+        Notifications.removeNotificationSubscription(notificationListener.current);
+      responseListener.current &&
+        Notifications.removeNotificationSubscription(responseListener.current);
+    };
+  }, []);
+
+
+  async function schedulePushNotification() {
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: "Data Uploaded",
+        body: 'The Data has been successfully pushed to the database.',
+
+      },
+      trigger: null,
+    });
+  }
+
+  async function registerForPushNotificationsAsync() {
+    let token;
+
+    if (Platform.OS === 'android') {
+      await Notifications.setNotificationChannelAsync('default', {
+        name: 'default',
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#FF231F7C',
+      });
+    }
+
+    if (Device.isDevice) {
+      const { status: existingStatus } = await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+      if (existingStatus !== 'granted') {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+      if (finalStatus !== 'granted') {
+        alert('Failed to get push token for push notification!');
+        Linking.openSettings();
+
+        return;
+      }
+      // Learn more about projectId:
+      // https://docs.expo.dev/push-notifications/push-notifications-setup/#configure-projectid
+      // EAS projectId is used here.
+      try {
+        const projectId =
+          Constants?.expoConfig?.extra?.eas?.projectId ?? Constants?.easConfig?.projectId;
+        if (!projectId) {
+          throw new Error('Project ID not found');
+        }
+        token = (
+          await Notifications.getExpoPushTokenAsync({
+            projectId,
+          })
+        ).data;
+        console.log(token);
+      } catch (e) {
+        token = `${e}`;
+      }
+    } else {
+      alert('Must use physical device for Push Notifications');
+    }
+
+    return token;
+  }
 
   useEffect(() => {
     (async () => {
@@ -157,7 +260,9 @@ export default function Home({ }) {
 
         newReference
           .set(dataToPush)
-          .then(() => console.log('Data updated.'));
+          .then(async () => await schedulePushNotification());
+
+
       }
 
 
@@ -215,22 +320,32 @@ export default function Home({ }) {
             <RotationRate delay={delay} collectData={collectData} data={rotationRateData} />
             <LatLong delay={delay} collectData={collectData} data={latLongData} />
 
-            {(!setCamera && !collectData) && <Pressable style={styles.button} onPress={() => setSetCamera(true)}>
+            {/* {(!setCamera && !collectData) && <Pressable style={styles.button} onPress={() => setSetCamera(true)}>
               <Text style={styles.text}>Set Camera</Text>
-            </Pressable>}
+            </Pressable>} */}
 
-            {(!collectData && setCamera) && <Pressable style={cameraPermissions ? styles.button : styles.disabledButton} onPress={() => setCollectData(true)} disabled={!cameraPermissions}>
+            {/* {(!collectData && setCamera) && <Pressable style={cameraPermissions ? styles.button : styles.disabledButton} onPress={() => setCollectData(true)} disabled={!cameraPermissions}>
               <Text style={styles.text}>Collect Data</Text>
             </Pressable>}
 
             {(collectData && setCamera) && <Pressable style={styles.button} onPress={() => { setCollectData(false) }}>
               <Text style={styles.text}>Stop Collection</Text>
+            </Pressable>} */}
+
+            {(!collectData) && <Pressable style={styles.button} onPress={() => setCollectData(true)}>
+              <Text style={styles.text}>Collect Data</Text>
+            </Pressable>}
+
+            {(collectData) && <Pressable style={styles.button} onPress={() => { setCollectData(false) }}>
+              <Text style={styles.text}>Stop Collection</Text>
             </Pressable>}
           </ScrollView>
 
-          {setCamera && <View style={styles.cameraContainer}>
+          {/* {setCamera && <View style={styles.cameraContainer}>
             <MobileCam collectData={collectData} setSetCamera={setSetCamera} setCameraPermissions={setCameraPermissions} hasMediaLibraryPermission={hasMediaLibraryPermission} />
-          </View>}
+          </View>} */}
+
+
         </>
       }
 

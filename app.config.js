@@ -10,7 +10,7 @@ module.exports = ({ config }) => {
       android: {
         config: {
           googleMaps: {
-            apiKey: process.env.GOOGLEMAPS_APIKEY,
+            apiKey: process.env.GOOGLE_MAPS_API_KEY,
           },
         },
         permissions: [
@@ -23,8 +23,8 @@ module.exports = ({ config }) => {
           "android.permission.WRITE_EXTERNAL_STORAGE",
           "android.permission.ACCESS_MEDIA_LOCATION"
         ],
-        package: "com.rehmanbatt.SensorX",
-        googleServicesFile: "./google-services.json"
+        package: "com.rehmanbatt.RoadInSight",
+        googleServicesFile: process.env.GOOGLE_SERVICES_JSON,
       },
       
     

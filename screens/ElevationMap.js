@@ -1,16 +1,17 @@
 import React, { useState, useRef } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import MapView, { Circle } from "react-native-maps";
 import { firebase } from "@react-native-firebase/database";
 import { geohashQueryBounds, distanceBetween } from "geofire-common";
 
 const ElevationMap = () => {
   const [slopeData, setSlopeData] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [region, setRegion] = useState({
     latitude: 33.656463,
     longitude: 73.015318,
-    latitudeDelta: 0.01,  
-    longitudeDelta: 0.01,
+    latitudeDelta: 0.02,
+    longitudeDelta: 0.02,
   });
 
   const mapRef = useRef(null);
@@ -18,13 +19,14 @@ const ElevationMap = () => {
   // Function to calculate dynamic search radius
   const getSearchRadius = (latitudeDelta) => {
     // Approximate search radius based on zoom level (latitudeDelta)
-    return Math.min(1000, Math.max(500, latitudeDelta * 2500)); 
+    return Math.min(200000, Math.max(1000, latitudeDelta * 50000));
     // Min 500m when zoomed in, Max 1km when zoomed out
   };
 
 
   // Fetch slope data based on map center & zoom level
   const fetchSlopeData = async () => {
+    setLoading(true);
     const searchRadius = getSearchRadius(region.latitudeDelta);
     console.log(`Fetching data within ${searchRadius} meters`);
 
@@ -62,6 +64,8 @@ const ElevationMap = () => {
       setSlopeData(slopeResults);
     } catch (error) {
       console.error("Error fetching slope data:", error);
+    } finally {
+      setLoading(false);  // Stop loading
     }
   };
 
@@ -77,6 +81,8 @@ const ElevationMap = () => {
         style={{ flex: 1 }}
         initialRegion={region}
         onRegionChangeComplete={onRegionChangeComplete}
+  
+
       >
         {slopeData.map((slope, index) => (
           <Circle
@@ -86,13 +92,19 @@ const ElevationMap = () => {
             strokeWidth={1}
             strokeColor={slope.color}
             fillColor={`${slope.color}80`}
+            maxZoomLevel={10}
           />
         ))}
       </MapView>
 
-      {/* Styled Button */}
-      <TouchableOpacity style={styles.button} onPress={fetchSlopeData}>
-        <Text style={styles.buttonText}>Fetch Slopes for This Area</Text>
+      {loading && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0e4c92" style={{ transform: [{ scale: 1.5 }] }} />
+        </View>
+      )}
+
+      <TouchableOpacity style={styles.button} onPress={fetchSlopeData} disabled={loading}>
+        <Text style={styles.buttonText}>{loading ? "Fetching..." : "Fetch Slopes for This Area"}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -113,6 +125,12 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  loadingContainer: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.3)",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 

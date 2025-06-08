@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { initializeAuth, getReactNativePersistence } from 'firebase/auth';
-import {API_KEY, authDomain, projectId, storageBucket, messagingSenderId, appId, measurementId, DB_URL} from '@env';
+// import {API_KEY, authDomain, projectId, storageBucket, messagingSenderId, appId, measurementId, DB_URL} from '@env';
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 import { getDatabase } from 'firebase/database';
 
@@ -24,14 +24,14 @@ database().setPersistenceCacheSizeBytes(100000000);
 
 
 const firebaseConfig = {
-  apiKey: API_KEY,
-  authDomain: authDomain,
-  projectId: projectId,
-  storageBucket: storageBucket,
-  messagingSenderId: messagingSenderId,
-  appId: appId,
-  measurementId: measurementId,
-  databaseURL: DB_URL,
+  apiKey: process.env.API_KEY,
+  authDomain: process.env.authDomain,
+  projectId: process.env.projectId,
+  storageBucket: process.env.storageBucket,
+  messagingSenderId: process.env.messagingSenderId,
+  appId: process.env.appId,
+  measurementId: process.env.measurementId,
+  databaseURL: process.env.DB_URL,
 };
 
 

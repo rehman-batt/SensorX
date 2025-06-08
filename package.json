@@ -6,8 +6,7 @@
     "start": "expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "web": "expo start --web",
-    "eas-build-pre-install": "echo $GOOGLE_SERVICES_JSON_2 | base64 --decode > google-services.json && echo $ENV_API | base64 --decode > ./.env"
+    "web": "expo start --web"
   },
   "dependencies": {
     "@firebase/database": "^1.0.8",
@@ -37,6 +36,7 @@
     "firebase": "^10.13.0",
     "geofire-common": "^6.0.0",
     "haversine": "^1.1.1",
+    "lucide-react-native": "^0.487.0",
     "react": "18.3.1",
     "react-native": "0.76.3",
     "react-native-chart-kit": "^6.12.0",
