@@ -119,11 +119,11 @@ export const styles = StyleSheet.create({
         
         flex: 1,
         width: '100%',
-        alignItems: 'center',
+       
         
     },
     GraphTitle: {
-        marginTop: 75,
+        marginTop: 50,
         fontWeight: 'bold',
         fontSize: 30,
         textAlign: 'center',

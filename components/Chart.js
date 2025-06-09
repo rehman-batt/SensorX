@@ -1,41 +1,97 @@
-import React from 'react';
-import { View, Dimensions, StyleSheet } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
 import { LineChart } from 'react-native-chart-kit';
 
-const LiveChart = ({ name1, data1, name2, data2, name3, data3 }) => {
+import {
+  View,
+  Text,
+  StyleSheet,
+  Dimensions,
+} from 'react-native';
 
+const backgroundColor = '#f2f2f2';
+const foregroundColor1 = '#0e4c92';
+const buttonBackground = '#0e4c92';
+const buttonForeground = 'white';
+const foregroundColor2 = 'black';
+
+const cardBackground = '#ffffff';
+const shadowColor = '#cbd5e1';
+const xAxisColor = '#0e4c92';
+const yAxisColor = '#059669';
+const zAxisColor = '#6D28D9';
+const textSecondary = '#64748b';
+
+
+
+const LiveChart = ({ name1, data1, name2, data2, name3, data3 }) => {
+  const length = data1.length;
   const chartConfig = {
-    backgroundGradientFrom: '#f2f2f2',
-    backgroundGradientTo: '#f2f2f2',
-    color: (opacity = 1) => `rgba(14, 76, 146, ${opacity})`,
-    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-    strokeWidth: 2,
+    backgroundColor: cardBackground,
+    backgroundGradientFrom: cardBackground,
+    backgroundGradientTo: cardBackground,
+    decimalPlaces: 2,
+    color: (opacity = 1) => `rgba(100, 116, 139, ${opacity})`,
+    labelColor: (opacity = 1) => `rgba(100, 116, 139, ${opacity})`,
     style: {
       borderRadius: 16,
+    },
+    propsForDots: {
+      r: '0',
+    },
+    propsForBackgroundLines: {
+      strokeDasharray: '',
+      stroke: '#e2e8f0',
+      strokeWidth: 1,
     },
   };
 
   return (
     <View style={styles.container}>
+
+      {/* Current Readings */}
+      <View style={styles.readingsContainer}>
+        <View style={[styles.readingCard, { borderLeftColor: xAxisColor }]}>
+          <Text style={styles.axisLabel}>X-Axis</Text>
+          <Text style={[styles.readingValue, { color: xAxisColor }]}>
+            {data1[length - 1].toFixed(2)}
+          </Text>
+          
+        </View>
+        <View style={[styles.readingCard, { borderLeftColor: yAxisColor }]}>
+          <Text style={styles.axisLabel}>Y-Axis</Text>
+          <Text style={[styles.readingValue, { color: yAxisColor }]}>
+            {data2[length - 1].toFixed(2)}
+          </Text>
+         
+        </View>
+        <View style={[styles.readingCard, { borderLeftColor: zAxisColor }]}>
+          <Text style={styles.axisLabel}>Z-Axis</Text>
+          <Text style={[styles.readingValue, { color: zAxisColor }]}>
+            {data3[length - 1].toFixed(2)}
+          </Text>
+          
+        </View>
+      </View>
+
       <LineChart
         bezier
         data={{
-          labels: Array.from({ length: data1.length }, (_, i) => i + 1),
+          labels: Array.from({ length: length }, (_, i) => i + 1),
           datasets: [
             {
               data: data1,
               strokeWidth: 2,
-              color: (opacity = 1) => `rgba(237, 96, 62, ${opacity})`,
+              color: () => xAxisColor,
             },
             {
               data: data2,
               strokeWidth: 2,
-              color: (opacity = 1) => `rgba(235, 193, 84, ${opacity})`,
+              color: () => yAxisColor,
             },
             {
               data: data3,
               strokeWidth: 2,
-              color: (opacity = 1) => `rgba(54, 193, 190, ${opacity})`,
+              color: () => zAxisColor,
             },
           ],
           legend: [name1, name2, name3],
@@ -44,14 +100,21 @@ const LiveChart = ({ name1, data1, name2, data2, name3, data3 }) => {
         height={300}
         chartConfig={chartConfig}
         fromZero={true}
-        style={{
-          borderRadius: 16,
-          marginRight: 25,
-        }}
+
+        withInnerLines={true}
+        withOuterLines={true}
+        withVerticalLines={false}
+        withHorizontalLines={true}
+        withDots={false}
+        style={styles.chart}
+
+
+
       />
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
@@ -59,6 +122,64 @@ const styles = StyleSheet.create({
     backgroundColor: '#f2f2f2',
     marginTop: 65,
   },
+  readingsContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 20,
+    marginBottom: 30,
+    gap: 12,
+  },
+  readingCard: {
+    flex: 1,
+    backgroundColor: cardBackground,
+    borderRadius: 16,
+    padding: 20,
+    alignItems: 'center',
+    borderLeftWidth: 4,
+    shadowColor: shadowColor,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  axisLabel: {
+    fontSize: 14,
+    color: textSecondary,
+    marginBottom: 8,
+    fontWeight: '600',
+  },
+  readingValue: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  chart: {
+    borderRadius: 8,
+  },
+  
+  
+ 
+  
 });
 
+
 export default LiveChart;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
