@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from "rea
 import MapView, { Circle } from "react-native-maps";
 import { firebase } from "@react-native-firebase/database";
 import { geohashQueryBounds, distanceBetween } from "geofire-common";
+import Icon from 'react-native-vector-icons/FontAwesome6';
 
 const MapScreen = () => {
   const [conditionData, setConditionData] = useState([]);
@@ -10,25 +11,30 @@ const MapScreen = () => {
   const [region, setRegion] = useState({
     latitude: 33.656463,
     longitude: 73.015318,
-    latitudeDelta: 0.02,
-    longitudeDelta: 0.02,
+    latitudeDelta: 0.015,
+    longitudeDelta: 0.015,
   });
 
   const mapRef = useRef(null);
 
   // Function to calculate dynamic search radius
-  const getSearchRadius = (latitudeDelta) => {
-    // Approximate search radius based on zoom level (latitudeDelta)
-    // Math.min(200000, Math.max(1000, latitudeDelta * 50000));
-    return Math.min(120000, Math.max(6000, latitudeDelta * 22000));
-    // Min 500m when zoomed in, Max 1km when zoomed out
+  const getSearchRadius = (region) => {
+    const earthRadius = 6371000; // meters
+
+    const latDeltaInRad = region.latitudeDelta * (Math.PI / 180);
+    const lonDeltaInRad = region.longitudeDelta * (Math.PI / 180);
+
+    const latRadius = (latDeltaInRad / 2) * earthRadius;
+    const lonRadius = (lonDeltaInRad / 2) * earthRadius * Math.cos(region.latitude * (Math.PI / 180));
+
+    return Math.min(latRadius, lonRadius, 2500);
   };
 
 
   // Fetch slope data based on map center & zoom level
   const fetchConditionData = async () => {
     setLoading(true);
-    const searchRadius = getSearchRadius(region.latitudeDelta);
+    const searchRadius = getSearchRadius(region);
     console.log(`Fetching data within ${searchRadius} meters`);
 
     try {
@@ -39,7 +45,7 @@ const MapScreen = () => {
         return firebase
           .app()
           .database("https://roadinsight-default-rtdb.asia-southeast1.firebasedatabase.app/")
-          .ref("conditions2")
+          .ref("conditions")
           .orderByChild("geohash")
           .startAt(start)
           .endAt(end)
@@ -83,15 +89,18 @@ const MapScreen = () => {
         initialRegion={region}
         onRegionChangeComplete={onRegionChangeComplete}
         maxZoomLevel={20}
+        showsUserLocation={true}
+        showsMyLocationButton={true}
       >
         {conditionData.map((condition, index) => (
           <Circle
             key={index}
             center={{ latitude: condition.lat, longitude: condition.long }}
-            radius={10}
+            radius={12}
             strokeWidth={1}
             strokeColor={condition.color}
             fillColor={`${condition.color}80`}
+
           />
         ))}
       </MapView>
@@ -103,8 +112,8 @@ const MapScreen = () => {
       )}
 
       {/* Styled Button */}
-      <TouchableOpacity style={styles.button} onPress={fetchConditionData}>
-        <Text style={styles.buttonText}>{loading ? "Fetching..." : "Fetch Conditions for This Area"}</Text>
+      <TouchableOpacity style={styles.button} onPress={fetchConditionData} disabled={loading}>
+        <Icon name="road-circle-exclamation" size={30} color="white" />
       </TouchableOpacity>
 
     </View>
@@ -115,12 +124,17 @@ const styles = StyleSheet.create({
   button: {
     position: "absolute",
     bottom: 20,
-    alignSelf: "center",
-    backgroundColor: "#0e4c92",
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 25,
+    right: 20,
+    // backgroundColor: "#0e4c92",
+    backgroundColor: '#EF4444',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: "center",
+    alignItems: "center",
     elevation: 3,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   buttonText: {
     color: "white",

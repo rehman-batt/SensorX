@@ -9,7 +9,7 @@ import Slider from '@react-native-community/slider';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Icon2 from 'react-native-vector-icons/AntDesign';
 import { carNames } from '../data/Cars';
-import { set, ref } from 'firebase/database';
+import { set, ref, update } from 'firebase/database';
 import { getDownloadURL, uploadBytes, getStorage, ref as storageRef, deleteObject } from 'firebase/storage';
 import { useDrawerStatus } from '@react-navigation/drawer';
 
@@ -657,7 +657,7 @@ export default function Settings() {
         try {
             const user = FIREBASE_AUTH.currentUser;
             const userRef = ref(db, 'users/' + user.uid);
-            await set(userRef, {
+            await update(userRef, {
                 email: user.email,
                 car: selectedCar,
                 makeYear: makeYear,

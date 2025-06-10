@@ -421,7 +421,7 @@ export default function Dashboard() {
                         <MetricCard
                             title="Total Time"
                             value={totalTime}
-                            // unit="hrs"
+                            unit="hrs"
                             iconName="time"
                         />
                     </View>
@@ -447,7 +447,7 @@ export default function Dashboard() {
                         <MetricCard
                             title="Your Time"
                             value={userTime}
-                            // unit="hrs"
+                            unit="hrs"
                             iconName="time"
                             color={Colors.successColor}
                         />
@@ -474,7 +474,7 @@ export default function Dashboard() {
                         <MetricCard
                             title="Avg Time"
                             value={avgTime}
-                            // unit="hrs"
+                            unit="hrs"
                             iconName="time"
                             color={Colors.purpleAccent}
                         />
@@ -512,11 +512,7 @@ export default function Dashboard() {
                                     : (userDistance / avgDistance).toFixed(1) + 'x'}
                             </Text>
                             <Text style={styles.summaryLabel}>
-                                {userDistance === 'N/A' || avgDistance === 'N/A'
-                                    ? ''
-                                    : userDistance >= avgDistance
-                                        ? 'above average'
-                                        : 'below average'}
+                                average
                             </Text>
                         </View>
                     </View>
