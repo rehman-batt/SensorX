@@ -5,12 +5,13 @@ import { useFocusEffect } from '@react-navigation/native';
 import { styles } from '../styles/SensorStyles';
 
 export default function Gyro({ delay, collectData, data }) {
-
+    // State to track permission status and current gyroscope values
     const [status, setStatus] = useState(false);
     const [errorMsg, setErrorMsg] = useState('Please provide permission to access Gyroscope');
     const [{ x, y, z }, setData] = useState({ x: 0, y: 0, z: 0 });
     const subscription = useRef(null);
 
+    // If data collection is enabled and permission is granted, push current values to shared ref
     if (collectData && status) {
         data.current['x'].push(x);
         data.current['y'].push(y);
@@ -18,12 +19,14 @@ export default function Gyro({ delay, collectData, data }) {
         data.current['timestamp'].push(Date.now());
     }
 
+    // Set gyroscope update interval
     Gyroscope.setUpdateInterval(delay);
 
     useFocusEffect(
         React.useCallback(() => {
             let isActive = true;
 
+            // Request permission and subscribe to gyroscope updates
             (async () => {
                 try {
                     let permissionStatus = await Gyroscope.requestPermissionsAsync();
@@ -50,6 +53,7 @@ export default function Gyro({ delay, collectData, data }) {
                 }
             })();
 
+            // Clean up listener on component blur/unmount
             return () => {
                 isActive = false;
                 if (subscription.current) {
@@ -108,6 +112,8 @@ export default function Gyro({ delay, collectData, data }) {
                 </>
             )}
 
+
+            {/* Display error message if permission denied or other error occurs */}
             {errorMsg && (
                 <View style={styles.errorView}>
                     <Text>{errorMsg}</Text>

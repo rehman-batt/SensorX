@@ -1,237 +1,5 @@
-// import React, { useState, useEffect } from 'react';
-// import { View, Text, ScrollView, ActivityIndicator } from 'react-native';
-// import { FIREBASE_AUTH } from '../config/firebase.js';
-// import Icon from 'react-native-vector-icons/FontAwesome';
-
-// //uncomment
-// import { firebase } from '@react-native-firebase/database';
-// import { foregroundColor1 } from '../styles/SensorStyles.js';
-
-// const Dashboard = () => {
-//     const [totalUsers, setTotalUsers] = useState('N/A');
-//     const [userTime, setUserTime] = useState('N/A');
-//     const [totalTime, setTotalTime] = useState('N/A');
-//     const [avgTime, setAvgTime] = useState('N/A');
-//     const [userDistance, setUserDistance] = useState('N/A');
-//     const [totalDistance, setTotalDistance] = useState('N/A');
-//     const [avgDistance, setAvgDistance] = useState('N/A');
-//     const [loading, setLoading] = useState(true);
-
-//     const convertMsToTime = (ms) => {
-//         const hours = Math.floor(ms / 3600000);
-//         const minutes = Math.floor((ms % 3600000) / 60000);
-//         const seconds = Math.floor((ms % 60000) / 1000);
-//         return `${hours}h ${minutes}m ${seconds}s`;
-//     };
-
-//     useEffect(() => {
-//         const fetchDashboardData = async () => {
-//             try {
-//                 // const userID = FIREBASE_AUTH.currentUser?.uid;
-
-//                 // const db = firebase.app().database('https://roadinsight-default-rtdb.asia-southeast1.firebasedatabase.app/');
-
-//                 // const [
-//                 //     usersSnap,
-//                 //     userTimeSnap,
-//                 //     totalTimeSnap,
-//                 //     userDistanceSnap,
-//                 //     totalDistanceSnap
-//                 // ] = await Promise.all([
-//                 //     db.ref('totalUsers').get(),
-//                 //     db.ref(`users/${userID}/time`).get(),
-//                 //     db.ref('time').get(),
-//                 //     db.ref(`users/${userID}/distance`).get(),
-//                 //     db.ref('distance').get(),
-//                 // ]);
-
-//                 // setTotalUsers(usersSnap.exists() ? usersSnap.val() : 'N/A');
-//                 // setUserTime(userTimeSnap.exists() ? convertMsToTime(userTimeSnap.val()) : 'N/A');
-//                 // setTotalTime(totalTimeSnap.exists() ? convertMsToTime(totalTimeSnap.val()) : 'N/A');
-//                 // setAvgTime(usersSnap.exists() && totalTimeSnap.exists() ?
-//                 //     convertMsToTime(parseInt(totalTimeSnap.val() / usersSnap.val())) : 'N/A');
-
-//                 // setUserDistance(userDistanceSnap.exists() ? (userDistanceSnap.val() / 1000).toFixed(5) : 'N/A');
-//                 // setTotalDistance(totalDistanceSnap.exists() ? (totalDistanceSnap.val() / 1000).toFixed(5) : 'N/A');
-//                 // setAvgDistance(usersSnap.exists() && totalDistanceSnap.exists() ?
-//                 //     ((totalDistanceSnap.val() / usersSnap.val()) / 1000).toFixed(5) : 'N/A');
-
-//                 const userID = FIREBASE_AUTH.currentUser?.uid;
-
-//                 const db = firebase.app().database('https://roadinsight-default-rtdb.asia-southeast1.firebasedatabase.app/');
-
-//                 const updateValues = (snapshot, setState, transform = (val) => val) => {
-//                     setState(snapshot.exists() ? transform(snapshot.val()) : 'N/A');
-//                 };
-
-//                 // Set up listeners
-//                 db.ref('totalUsers').on('value', (snapshot) => updateValues(snapshot, setTotalUsers));
-
-//                 db.ref(`users/${userID}/time`).on('value', (snapshot) => updateValues(snapshot, setUserTime, convertMsToTime));
-
-//                 db.ref('time').on('value', (snapshot) => updateValues(snapshot, setTotalTime, convertMsToTime));
-
-//                 db.ref(`users/${userID}/distance`).on('value', (snapshot) =>
-//                     updateValues(snapshot, setUserDistance, (val) => (val / 1000).toFixed(5))
-//                 );
-
-//                 db.ref('distance').on('value', (snapshot) =>
-//                     updateValues(snapshot, setTotalDistance, (val) => (val / 1000).toFixed(5))
-//                 );
-
-//                 // Compute average time and distance dynamically
-//                 db.ref('totalUsers').on('value', (usersSnap) => {
-//                     db.ref('time').on('value', (totalTimeSnap) => {
-//                         setAvgTime(
-//                             usersSnap.exists() && totalTimeSnap.exists()
-//                                 ? convertMsToTime(parseInt(totalTimeSnap.val() / usersSnap.val()))
-//                                 : 'N/A'
-//                         );
-//                     });
-
-//                     db.ref('distance').on('value', (totalDistanceSnap) => {
-//                         setAvgDistance(
-//                             usersSnap.exists() && totalDistanceSnap.exists()
-//                                 ? ((totalDistanceSnap.val() / usersSnap.val()) / 1000).toFixed(5)
-//                                 : 'N/A'
-//                         );
-//                     });
-//                 });
-
-//             } catch (error) {
-//                 console.error('Error fetching dashboard data:', error);
-//             } finally {
-//                 setLoading(false);
-//             }
-//         };
-
-//         fetchDashboardData();
-//     }, []);
-
-
-//     const styles = {
-
-//         container: {
-//             flex: 1,
-//             backgroundColor: '#f2f2f2',
-//             padding: 16,
-//             justifyContent: 'space-between'
-//         },
-//         card: {
-//             flex: 1,
-//             backgroundColor: '#e6e6e6',
-//             padding: 16,
-//             marginBottom: 12,
-//             borderRadius: 12,
-//             shadowColor: '#000',
-//             shadowOpacity: 0.1,
-//             shadowRadius: 4,
-//             elevation: 4,
-//             flexDirection: 'row',
-//         },
-//         lastCard:
-//         {
-//             flex: 1,
-//             backgroundColor: '#e6e6e6',
-//             padding: 16,
-//             // marginBottom: 12,
-//             borderRadius: 12,
-//             shadowColor: '#000',
-//             shadowOpacity: 0.1,
-//             shadowRadius: 4,
-//             elevation: 4,
-//             flexDirection: 'row',
-//         },
-
-//         title: {
-//             fontSize: 18,
-//             fontWeight: 'bold',
-//             color: '#0e4c92',
-//             // marginBottom: 6,
-//         },
-//         value: {
-
-//             fontSize: 20,
-//             fontWeight: '600',
-//             color: 'black',
-
-//         },
-//         loaderContainer: {
-//             flex: 1,
-//             justifyContent: 'center',
-//             alignItems: 'center',
-//             backgroundColor: '#f2f2f2',
-//         },
-//     };
-
-//     return (
-
-//         loading ? (
-//             <View style={styles.loaderContainer}>
-//                 <ActivityIndicator size={100} color="#0e4c92" />
-//             </View>
-//         ) : (
-//             <View style={styles.container}>
-//                 <View style={styles.card}>
-//                     <Icon name="users" size={30} color={foregroundColor1} />
-//                     <View>
-//                         <Text style={styles.title}>Total Users</Text>
-//                         <Text style={styles.value}>{totalUsers}</Text>
-//                     </View>
-//                 </View>
-//                 <View style={styles.card}>
-//                     <Icon name="road" size={40} color={foregroundColor1} />
-//                     <View>
-//                         <Text style={styles.title}>Total Distance Covered (km)</Text>
-//                         <Text style={styles.value}>{totalDistance}</Text>
-//                     </View>
-//                 </View>
-//                 <View style={styles.card}>
-//                     <Icon name="users" size={40} color={foregroundColor1} />
-//                     <View>
-//                         <Text style={styles.title}>Total Time Spent</Text>
-//                         <Text style={styles.value}>{totalTime}</Text>
-//                     </View>
-//                 </View>
-//                 <View style={styles.card}>
-//                     <Icon name="users" size={40} color={foregroundColor1} />
-//                     <View>
-//                         <Text style={styles.title}>Your Distance Covered (km)</Text>
-//                         <Text style={styles.value}>{userDistance}</Text>
-//                     </View>
-//                 </View>
-//                 <View style={styles.card}>
-//                     <Icon name="users" size={40} color={foregroundColor1} />
-//                     <View>
-//                         <Text style={styles.title}>Your Time Spent</Text>
-//                         <Text style={styles.value}>{userTime}</Text>
-//                     </View>
-//                 </View>
-//                 <View style={styles.card}>
-//                     <Icon name="users" size={40} color={foregroundColor1} />
-//                     <View>
-//                         <Text style={styles.title}>Average Distance per User (km)</Text>
-//                         <Text style={styles.value}>{avgDistance}</Text>
-//                     </View>
-//                 </View>
-//                 <View style={styles.lastCard}>
-//                     <Icon name="users" size={40} color={foregroundColor1} />
-//                     <View>
-//                         <Text style={styles.title}>Average Time per User</Text>
-//                         <Text style={styles.value}>{avgTime}</Text>
-//                     </View>
-//                 </View>
-//             </View>
-//         )
-
-//     );
-// };
-
-// export default Dashboard;
-
+// Firebase and React Native dependencies
 import { FIREBASE_AUTH } from '../config/firebase.js';
-
-// //uncomment
 import { firebase } from '@react-native-firebase/database';
 
 import React, { useState, useEffect } from 'react';
@@ -247,6 +15,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 
+// App color scheme constants
 const Colors = {
     backgroundColor: '#f9fafb',
     cardBackground: '#ffffff',
@@ -277,6 +46,7 @@ const Colors = {
 const windowWidth = Dimensions.get('window').width;
 const cardWidth = (windowWidth - 54) / 2;
 
+// Reusable card component for dashboard metrics
 function MetricCard({
     title,
     value,
@@ -309,6 +79,7 @@ function MetricCard({
 
 export default function Dashboard() {
 
+    // States for various metrics and loading
     const [totalUsers, setTotalUsers] = useState('N/A');
     const [userTime, setUserTime] = useState('N/A');
     const [totalTime, setTotalTime] = useState('N/A');
@@ -318,27 +89,26 @@ export default function Dashboard() {
     const [avgDistance, setAvgDistance] = useState('N/A');
     const [loading, setLoading] = useState(true);
 
+    // Convert milliseconds to hours with 2 decimal precision
     const convertMsToTime = (ms) => {
         const hours = ms / 3600000;
-        // const minutes = Math.floor((ms % 3600000) / 60000);
-        // const seconds = Math.floor((ms % 60000) / 1000);
         return hours.toFixed(2);
     };
 
+    // Fetch data from Firebase once on component mount
     useEffect(() => {
         const fetchDashboardData = async () => {
             try {
-
-
                 const userID = FIREBASE_AUTH.currentUser?.uid;
 
                 const db = firebase.app().database('https://roadinsight-default-rtdb.asia-southeast1.firebasedatabase.app/');
 
+                // Helper to update state with Firebase values or 'N/A'
                 const updateValues = (snapshot, setState, transform = (val) => val) => {
                     setState(snapshot.exists() ? transform(snapshot.val()) : 'N/A');
                 };
 
-                // Set up listeners
+                // Realtime listeners for global and user metrics
                 db.ref('totalUsers').on('value', (snapshot) => updateValues(snapshot, setTotalUsers));
 
                 db.ref(`users/${userID}/time`).on('value', (snapshot) => updateValues(snapshot, setUserTime, convertMsToTime));
@@ -353,7 +123,7 @@ export default function Dashboard() {
                     updateValues(snapshot, setTotalDistance, (val) => (val / 1000).toFixed(2))
                 );
 
-                // Compute average time and distance dynamically
+                // Compute community averages using current totalUsers
                 db.ref('totalUsers').on('value', (usersSnap) => {
                     db.ref('time').on('value', (totalTimeSnap) => {
                         setAvgTime(
@@ -382,7 +152,6 @@ export default function Dashboard() {
         fetchDashboardData();
     }, []);
 
-
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: Colors.backgroundColor }]}>
             <StatusBar style="dark" />
@@ -391,9 +160,10 @@ export default function Dashboard() {
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={styles.scrollContent}
             >
+                {/* Dashboard Header */}
                 <View style={styles.header}></View>
 
-                {/* Global Statistics */}
+                {/* Global Statistics Section */}
                 <View style={styles.section}>
                     <View style={styles.sectionHeader}>
                         <Ionicons name="bar-chart" size={20} color={Colors.foregroundColor1} />
@@ -427,7 +197,7 @@ export default function Dashboard() {
                     </View>
                 </View>
 
-                {/* Your Statistics */}
+                {/* User-Specific Statistics Section */}
                 <View style={styles.section}>
                     <View style={styles.sectionHeader}>
                         <Ionicons name="person" size={20} color={Colors.greenAccent} />
@@ -454,7 +224,7 @@ export default function Dashboard() {
                     </View>
                 </View>
 
-                {/* Community Averages */}
+                {/* Community Averages Section */}
                 <View style={styles.section}>
                     <View style={styles.sectionHeader}>
                         <Ionicons name="trending-up" size={20} color={Colors.purpleAccent} />
@@ -481,12 +251,13 @@ export default function Dashboard() {
                     </View>
                 </View>
 
-                {/* Performance Summary */}
+                {/* Performance Summary Section */}
                 <View style={[styles.summaryCard, { backgroundColor: Colors.cardBackground }]}>
                     <Text style={[styles.summaryTitle, { color: Colors.foregroundColor2 }]}>
                         Performance Summary
                     </Text>
                     <View style={styles.summaryRow}>
+                        {/* User's contribution to total distance */}
                         <View style={[styles.summaryItem, { backgroundColor: Colors.summaryBlue }]}>
                             <Text style={[styles.summaryValue, { color: Colors.foregroundColor1 }]}>
                                 {userDistance === 'N/A' || totalDistance === 'N/A'
@@ -496,6 +267,7 @@ export default function Dashboard() {
                             <Text style={styles.summaryLabel}>of total distance</Text>
                         </View>
 
+                        {/* User's contribution to total time */}
                         <View style={[styles.summaryItem, { backgroundColor: Colors.summaryGreen }]}>
                             <Text style={[styles.summaryValue, { color: Colors.greenAccent }]}>
                                 {userTime === 'N/A' || totalTime === 'N/A'
@@ -505,6 +277,7 @@ export default function Dashboard() {
                             <Text style={styles.summaryLabel}>of total time</Text>
                         </View>
 
+                        {/* Comparison to average distance */}
                         <View style={[styles.summaryItem, { backgroundColor: Colors.summaryViolet }]}>
                             <Text style={[styles.summaryValue, { color: Colors.violetAccent }]}>
                                 {userDistance === 'N/A' || avgDistance === 'N/A'
@@ -516,7 +289,6 @@ export default function Dashboard() {
                             </Text>
                         </View>
                     </View>
-
                 </View>
             </ScrollView>
         </SafeAreaView>

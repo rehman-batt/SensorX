@@ -11,6 +11,7 @@ import { FIREBASE_AUTH, db } from '../config/firebase.js';
 import { Svg, Line, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { firebase } from '@react-native-firebase/database';
 
+// Configure how notifications behave when received
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
@@ -20,25 +21,28 @@ Notifications.setNotificationHandler({
 });
 
 export default function MobileCam({ collectData, setSetCamera, setCameraPermissions, hasMediaLibraryPermission }) {
+  // Camera and microphone permission hooks
   const [permission, requestPermission, getPermission] = useCameraPermissions();
   const [mPermissions, useMPermissions, getMPermissions] = useMicrophonePermissions();
-  const [recording, setRecording] = useState(false);
-  const cameraRef = useRef(null);
 
+  const [recording, setRecording] = useState(false); // Recording state
+  const cameraRef = useRef(null); // Ref to access camera methods
+
+  // Notification-related states and refs
   const [expoPushToken, setExpoPushToken] = useState('');
   const [channels, setChannels] = useState([]);
-  const [notification, setNotification] = useState(
-    undefined
-  );
+  const [notification, setNotification] = useState(undefined);
   const notificationListener = useRef();
   const responseListener = useRef();
 
+  // Register and listen for push notifications
   useEffect(() => {
     registerForPushNotificationsAsync().then(token => token && setExpoPushToken(token));
 
     if (Platform.OS === 'android') {
       Notifications.getNotificationChannelsAsync().then(value => setChannels(value ?? []));
     }
+
     notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
       setNotification(notification);
     });
@@ -55,18 +59,18 @@ export default function MobileCam({ collectData, setSetCamera, setCameraPermissi
     };
   }, []);
 
-
+  // Schedule a notification after video is saved
   async function schedulePushNotification() {
     await Notifications.scheduleNotificationAsync({
       content: {
         title: "Video Saved",
         body: 'The Video has been saved to the RoadInSight Album in the Media Gallery',
-
       },
       trigger: null,
     });
   }
 
+  // Register device for push notifications and get Expo push token
   async function registerForPushNotificationsAsync() {
     let token;
 
@@ -82,30 +86,24 @@ export default function MobileCam({ collectData, setSetCamera, setCameraPermissi
     if (Device.isDevice) {
       const { status: existingStatus } = await Notifications.getPermissionsAsync();
       let finalStatus = existingStatus;
+
       if (existingStatus !== 'granted') {
         const { status } = await Notifications.requestPermissionsAsync();
         finalStatus = status;
       }
+
       if (finalStatus !== 'granted') {
         alert('Failed to get push token for push notification!');
         Linking.openSettings();
-
         return;
       }
-      // Learn more about projectId:
-      // https://docs.expo.dev/push-notifications/push-notifications-setup/#configure-projectid
-      // EAS projectId is used here.
+
       try {
         const projectId =
           Constants?.expoConfig?.extra?.eas?.projectId ?? Constants?.easConfig?.projectId;
-        if (!projectId) {
-          throw new Error('Project ID not found');
-        }
-        token = (
-          await Notifications.getExpoPushTokenAsync({
-            projectId,
-          })
-        ).data;
+        if (!projectId) throw new Error('Project ID not found');
+
+        token = (await Notifications.getExpoPushTokenAsync({ projectId })).data;
         console.log(token);
       } catch (e) {
         token = `${e}`;
@@ -117,8 +115,8 @@ export default function MobileCam({ collectData, setSetCamera, setCameraPermissi
     return token;
   }
 
+  // Start or stop video recording based on collectData flag
   const videoRecording = async () => {
-
     if (collectData && !recording && cameraRef.current) {
       setRecording(true);
 
@@ -131,98 +129,74 @@ export default function MobileCam({ collectData, setSetCamera, setCameraPermissi
         const video = await cameraRef.current.recordAsync(options);
         setRecording(false);
         setSetCamera(false);
-        try {
-          console.log(video.uri);
 
-          let album = await MediaLibrary.getAlbumAsync('RoadInSight');
-          let asset = await MediaLibrary.createAssetAsync(video.uri);
+        let album = await MediaLibrary.getAlbumAsync('RoadInSight');
+        let asset = await MediaLibrary.createAssetAsync(video.uri);
 
-          if (album == null) {
-            try {
-              const result = await MediaLibrary.createAlbumAsync('RoadInSight', asset, false);
-              if (result) {
-                await schedulePushNotification();
-                console.log('Asset added to album successfully.');
-              } else {
-                console.log('Failed to add asset to album.');
-              }
-            } catch (error) {
-              console.error('Error adding asset to album:', error);
-            }
-
-          } else {
-
-            try {
-              const result = await MediaLibrary.addAssetsToAlbumAsync(asset, album, false);
-              if (result) {
-                await schedulePushNotification();
-                console.log('Asset added to album successfully.');
-
-                try {
-                  const userID = FIREBASE_AUTH.currentUser?.uid;
-                  if (userID) {
-
-                    const parts = video.uri.split("/");
-                    const fileName = parts[parts.length - 1];
-
-
-                    // uncomment
-                    const newReference = firebase.app().database('https://roadinsight-default-rtdb.asia-southeast1.firebasedatabase.app/').ref(`users/${userID}/videos`).push();
-
-                    newReference
-                      .set(fileName)
-                      .then(() => console.log('Data updated.'));
-                  }
-                } catch (error) {
-                  console.log("Error Setting Data: ", error);
-                  Alert.alert('Data Setting Error', error);
-                }
-
-              } else {
-                console.log('Failed to add asset to album.');
-              }
-            } catch (error) {
-              console.error('Error adding asset to album:', error);
-            }
-
+        // Create album if it doesn't exist
+        if (!album) {
+          const result = await MediaLibrary.createAlbumAsync('RoadInSight', asset, false);
+          if (result) {
+            await schedulePushNotification();
+            console.log('Asset added to album successfully.');
           }
+        } else {
+          const result = await MediaLibrary.addAssetsToAlbumAsync(asset, album, false);
+          if (result) {
+            await schedulePushNotification();
+            console.log('Asset added to album successfully.');
 
+            // Save video name in Firebase under current user's node
+            const userID = FIREBASE_AUTH.currentUser?.uid;
+            if (userID) {
+              const parts = video.uri.split("/");
+              const fileName = parts[parts.length - 1];
 
-        } catch {
-          console.error("Saving error:", error);
-          Alert.alert("Error", error.message || "An unknown error occurred");
+              const newReference = firebase
+                .app()
+                .database('https://roadinsight-default-rtdb.asia-southeast1.firebasedatabase.app/')
+                .ref(`users/${userID}/videos`)
+                .push();
 
+              await newReference.set(fileName);
+              console.log('Data updated.');
+            }
+          }
         }
       } catch (error) {
         console.error("Recording error:", error);
         Alert.alert("Error", error.message || "An unknown error occurred");
       }
+
     } else if (!collectData && recording && cameraRef.current) {
+      // Stop recording if flag is turned off
       cameraRef.current.stopRecording();
       setRecording(false);
-      setSetCamera(false); 
+      setSetCamera(false);
     }
   };
 
+  // Trigger recording when collectData changes
   useEffect(() => {
     videoRecording();
   }, [collectData]);
 
-
+  // Set permission flag for parent when all required permissions are granted
   useFocusEffect(
     React.useCallback(() => {
-      if (permission?.granted == true && mPermissions?.granted == true && hasMediaLibraryPermission) {
-        setCameraPermissions(permission && mPermissions && hasMediaLibraryPermission);
+      if (permission?.granted && mPermissions?.granted && hasMediaLibraryPermission) {
+        setCameraPermissions(true);
       }
     }, [permission, mPermissions, hasMediaLibraryPermission])
   );
 
-
-  if ((!permission) || (!mPermissions)) {
+  // While permission data is loading
+  if (!permission || !mPermissions) {
     return <View />;
   }
 
-  if ((!permission.granted) || (!mPermissions.granted)) {
+  // If permissions are not granted, show grant button
+  if (!permission.granted || !mPermissions.granted) {
     return (
       <View style={styles.container}>
         <Pressable
@@ -248,7 +222,6 @@ export default function MobileCam({ collectData, setSetCamera, setCameraPermissi
           }}
           style={styles.button}
         >
-
           <Text style={styles.text}>GRANT</Text>
           <Text style={styles.text}>PERMISSION</Text>
         </Pressable>
@@ -256,20 +229,19 @@ export default function MobileCam({ collectData, setSetCamera, setCameraPermissi
     );
   }
 
+  // Render camera view with gradient overlay lines
   return (
     <View style={styles.cameraContainer}>
       <CameraView mode="video" style={styles.camera} type={'back'} ref={cameraRef} />
       <Svg style={styles.overlay} height="100%" width="100%">
-      
         <Defs>
           <LinearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
-
-          <Stop offset="100%" stopColor="red" stopOpacity="0.4" />
+            <Stop offset="100%" stopColor="red" stopOpacity="0.4" />
             <Stop offset="50%" stopColor="green" stopOpacity="0.4" />
             <Stop offset="0%" stopColor="yellow" stopOpacity="0.4" />
-            
           </LinearGradient>
         </Defs>
+        {/* Vertical side lines with gradient coloring */}
         <Line x1="10%" y1="20%" x2="10%" y2="80%" stroke="url(#grad)" strokeWidth="10" />
         <Line x1="90%" y1="20%" x2="90%" y2="80%" stroke="url(#grad)" strokeWidth="10" />
       </Svg>
@@ -277,6 +249,7 @@ export default function MobileCam({ collectData, setSetCamera, setCameraPermissi
   );
 }
 
+// Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -296,7 +269,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     left: 0,
-
   },
   camera: {
     width: '100%',

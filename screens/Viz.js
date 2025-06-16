@@ -1,6 +1,5 @@
+// Import sensor graph components
 import AcceleroGraph from '../components/AcceleroGraph';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Image } from 'react-native';
 import GyroGraph from '../components/GyroGraph';
 import MagnetoGraph from '../components/MagnetoGraph';
 import MagnetoUncGraph from '../components/MagnetoUncGraph';
@@ -9,12 +8,19 @@ import MotionAccGravGraph from '../components/MotionAccGravGraph';
 import RotationGraph from '../components/RotationGraph';
 import RotationRateGraph from '../components/RotationRateGraph';
 
+// Import required modules
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Image } from 'react-native';
 
+// Create a bottom tab navigator
 const Tab = createBottomTabNavigator();
 
+// Main component rendering the tab-based sensor visualization
 export default function Viz() {
     return (
         <Tab.Navigator>
+
+            {/* Accelerometer data visualization */}
             <Tab.Screen
                 name="Acceleration Graph"
                 component={AcceleroGraph}
@@ -34,6 +40,7 @@ export default function Viz() {
                 }}
             />
 
+            {/* Gyroscope data visualization */}
             <Tab.Screen
                 name="Gyroscope Graph"
                 component={GyroGraph}
@@ -53,7 +60,7 @@ export default function Viz() {
                 }}
             />
 
-
+            {/* Magnetometer data visualization */}
             <Tab.Screen
                 name="Magnetometer Graph"
                 component={MagnetoGraph}
@@ -73,6 +80,7 @@ export default function Viz() {
                 }}
             />
 
+            {/* Uncalibrated magnetometer visualization */}
             <Tab.Screen
                 name="Magnetometer Uncalibrated Graph"
                 component={MagnetoUncGraph}
@@ -92,6 +100,7 @@ export default function Viz() {
                 }}
             />
 
+            {/* Motion acceleration (user movement only) */}
             <Tab.Screen
                 name="Motion Acceleration Graph"
                 component={MotionAccGraph}
@@ -111,6 +120,7 @@ export default function Viz() {
                 }}
             />
 
+            {/* Motion acceleration with gravity included */}
             <Tab.Screen
                 name="Motion Acceleration (Gravity) Graph"
                 component={MotionAccGravGraph}
@@ -130,6 +140,7 @@ export default function Viz() {
                 }}
             />
 
+            {/* Device rotation visualization */}
             <Tab.Screen
                 name="Device Rotation"
                 component={RotationGraph}
@@ -149,7 +160,7 @@ export default function Viz() {
                 }}
             />
 
-
+            {/* Rotation rate (angular velocity) visualization */}
             <Tab.Screen
                 name="Device Rotation Rate"
                 component={RotationRateGraph}
@@ -169,6 +180,5 @@ export default function Viz() {
                 }}
             />
         </Tab.Navigator>
-
-    )
+    );
 }

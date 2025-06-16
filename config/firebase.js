@@ -1,28 +1,17 @@
-// Import the functions you need from the SDKs you need
+// Import necessary Firebase modules for app initialization, authentication, and real-time database
 import { initializeApp } from "firebase/app";
 import { initializeAuth, getReactNativePersistence } from 'firebase/auth';
-// import {API_KEY, authDomain, projectId, storageBucket, messagingSenderId, appId, measurementId, DB_URL} from '@env';
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 import { getDatabase } from 'firebase/database';
 
-
-// uncomment
+// Import the React Native Firebase Realtime Database for additional persistence settings
 import database from '@react-native-firebase/database';
 
-
-
-// const reference = firebase.app().database('https://roadinsight-default-rtdb.asia-southeast1.firebasedatabase.app/')
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-
-// uncomment
+// Enable offline persistence and set cache size for React Native Firebase database
 database().setPersistenceEnabled(true);
-database().setPersistenceCacheSizeBytes(100000000);
+database().setPersistenceCacheSizeBytes(100000000); // 100MB cache size
 
-
+// Firebase configuration object using environment variables for security
 const firebaseConfig = {
   apiKey: process.env.API_KEY,
   authDomain: process.env.authDomain,
@@ -34,11 +23,13 @@ const firebaseConfig = {
   databaseURL: process.env.DB_URL,
 };
 
-
+// Initialize Firebase app
 export const FIREBASE_APP = initializeApp(firebaseConfig);
+
+// Initialize Firebase authentication with persistence using AsyncStorage (React Native)
 export const FIREBASE_AUTH = initializeAuth(FIREBASE_APP, {
   persistence: getReactNativePersistence(ReactNativeAsyncStorage)
 });
 
+// Initialize and export the Realtime Database instance
 export const db = getDatabase();
-

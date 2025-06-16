@@ -13,6 +13,7 @@ import {
     camerBackground,
 } from '../styles/SensorStyles';
 
+// Card component for displaying each ride entry
 const Card = ({ children }) => {
     return (
         <View style={styles.card}>
@@ -21,42 +22,40 @@ const Card = ({ children }) => {
     );
 };
 
+// Helper function to transform raw data into readable format
 const transformData = async (tempDataDict) => {
-    // Function to format timestamp into "HH:MM AM/PM"
+    // Format timestamp into HH:MM AM/PM
     const formatTime = (timestamp) => {
         const date = new Date(timestamp);
         return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true });
     };
 
-    // Function to format timestamp into "DD MMM, YYYY" (e.g., "12 Feb, 2025")
+    // Format timestamp into "12 Feb, 2025"
     const formatDate = (timestamp) => {
         const date = new Date(timestamp);
         return date.toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" });
     };
 
-    // Function to get address from lat/long, or return formatted coordinates if not found
+    // Get human-readable address from lat/long, or fallback to coordinates
     const getAddress = async (lat, long) => {
         try {
             let result = await Location.reverseGeocodeAsync({ latitude: lat, longitude: long });
             if (result.length > 0) {
                 const { name, street, city, region, country, postalCode } = result[0];
-
-                // Combine all available fields into a single formatted string
                 return [name, street, city, region, postalCode, country]
-                    .filter(Boolean) // Remove empty values
-                    .join(", "); // Join with a comma and space
+                    .filter(Boolean)
+                    .join(", ");
             }
         } catch (error) {
             console.log("Reverse Geocoding Error:", error);
         }
-        return `Lat: ${lat.toFixed(4)}, Long: ${long.toFixed(4)}`; // Fallback formatted string
+        return `Lat: ${lat.toFixed(4)}, Long: ${long.toFixed(4)}`;
     };
 
-    // Get addresses
+    // Perform transformations
     const startAddress = await getAddress(tempDataDict.startLat, tempDataDict.startLong);
     const endAddress = await getAddress(tempDataDict.endLat, tempDataDict.endLong);
 
-    // Return transformed data
     return {
         startTime: formatTime(tempDataDict.startTime),
         endTime: formatTime(tempDataDict.endTime),
@@ -67,75 +66,61 @@ const transformData = async (tempDataDict) => {
 };
 
 const Recordings = () => {
-
-
-    const [data, setData] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [data, setData] = useState([]);     // Store processed ride records
+    const [loading, setLoading] = useState(true); // Control loading spinner
 
     useEffect(() => {
-
-        const userID = FIREBASE_AUTH.currentUser?.uid;
+        const userID = FIREBASE_AUTH.currentUser?.uid; // Get currently authenticated user
         console.log(userID);
-        const dataRef = ref(db, 'users/' + userID + '/rides');
+        const dataRef = ref(db, 'users/' + userID + '/rides'); // Reference to user's ride data
 
+        // Listen for data changes at the reference path
         onValue(dataRef, (snapshot) => {
             if (snapshot.exists()) {
                 const userData = snapshot.val();
-                if (userData) {
+                const keys = Object.keys(userData); // Get all ride keys
 
-                    const keys = Object.keys(userData);
+                let transformedData = [];
 
-                    let transformedData = [];
+                try {
+                    keys.forEach((key) => {
+                        // Extract relevant start/end times and coordinates
+                        let tempDataDict = {
+                            'startTime': userData[key]['Accelerometer']['timestamp'][0],
+                            'endTime': userData[key]['Accelerometer']['timestamp'].at(-1),
+                            'startLat': userData[key]['Latitude and Longitude']['lat'][0],
+                            'endLat': userData[key]['Latitude and Longitude']['lat'].at(-1),
+                            'startLong': userData[key]['Latitude and Longitude']['long'][0],
+                            'endLong': userData[key]['Latitude and Longitude']['long'].at(-1),
+                        };
 
-                    try {
-
-                        keys.forEach((key) => {
-                            let tempDataDict = {
-                                'startTime': userData[key]['Accelerometer']['timestamp'][0],
-                                'endTime': userData[key]['Accelerometer']['timestamp'][(userData[key]['Accelerometer']['timestamp']).length - 1],
-                                'startLat': userData[key]['Latitude and Longitude']['lat'][0],
-                                'endLat': userData[key]['Latitude and Longitude']['lat'][(userData[key]['Latitude and Longitude']['lat']).length - 1],
-                                'startLong': userData[key]['Latitude and Longitude']['long'][0],
-                                'endLong': userData[key]['Latitude and Longitude']['long'][(userData[key]['Latitude and Longitude']['long']).length - 1],
-                            };
-
-
-
-
-                            transformData(tempDataDict).then((transformedDataDict) => {
-                                transformedData.push(transformedDataDict);
-
-                                // Set state after processing all data to avoid multiple state updates
-                                if (transformedData.length === keys.length) {
-                                    setData(transformedData);
-                                    setLoading(false);
-                                }
-                            });
+                        // Transform and push data, update state once all done
+                        transformData(tempDataDict).then((transformedDataDict) => {
+                            transformedData.push(transformedDataDict);
+                            if (transformedData.length === keys.length) {
+                                setData(transformedData);
+                                setLoading(false);
+                            }
                         });
-                    } catch (e) {
-                        console.log('Error fetching ride: ', e);
-                    }
-
+                    });
+                } catch (e) {
+                    console.log('Error fetching ride: ', e);
                 }
-
-
-
-
             } else {
                 console.log("No user data found");
-                setLoading(false);
+                setLoading(false); // Stop loading if no data
             }
         });
+    }, []); // Run once on mount
 
-    }, []);
-
-
-
+    // Conditional rendering
     return loading ? (
+        // Show loader while fetching data
         <View style={styles.loaderContainer}>
             <ActivityIndicator size={100} color="#0e4c92" />
         </View>
     ) : Array.isArray(data) && data.length > 0 ? (
+        // Show scrollable list of ride cards
         <ScrollView style={styles.container}>
             {data.map((item, index) => (
                 <Card key={index}>
@@ -151,12 +136,14 @@ const Recordings = () => {
             ))}
         </ScrollView>
     ) : (
+        // Show fallback message if no data
         <View style={styles.noDataContainer}>
             <Text style={styles.message}>No User Data Found</Text>
         </View>
     );
 };
 
+// Styling
 const styles = StyleSheet.create({
     loaderContainer: {
         flex: 1,
@@ -179,7 +166,6 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: backgroundColor,
         padding: 15,
-
     },
     card: {
         backgroundColor: "#ffffff",
@@ -229,7 +215,5 @@ const styles = StyleSheet.create({
         marginBottom: 5,
     },
 });
-
-
 
 export default Recordings;

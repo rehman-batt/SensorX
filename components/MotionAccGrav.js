@@ -4,64 +4,67 @@ import { styles } from '../styles/SensorStyles';
 import { DeviceMotion } from 'expo-sensors';
 import { useFocusEffect } from '@react-navigation/native';
 
-
 export default function MotionAccGrav({ delay, collectData, data }) {
 
+    // Track whether permission was granted
     const [status, setStatus] = useState(false);
+
+    // Display any permission or runtime errors
     const [errorMsg, setErrorMsg] = useState('Please provide permission to access device motion');
-    const [{ x, y, z }, setData] = useState({
-        x: 0,
-        y: 0,
-        z: 0,
-    });
+
+    // Store current x, y, z acceleration values
+    const [{ x, y, z }, setData] = useState({ x: 0, y: 0, z: 0 });
+
+    // Reference to store the subscription object
     const subscription = useRef(null);
 
+    // Collect data if allowed and permission is granted
     if (collectData && status) {
-
         data.current['x'].push(x);
         data.current['y'].push(y);
         data.current['z'].push(z);
         data.current['timestamp'].push(Date.now());
     }
 
+    // Set the update interval for DeviceMotion readings
     DeviceMotion.setUpdateInterval(delay);
 
+    // Run sensor permission and listener setup when screen is focused
     useFocusEffect(
         React.useCallback(() => {
             let isActive = true;
 
             (async () => {
                 try {
+                    // Request permission to access motion sensor
                     let permissionStatus = await DeviceMotion.requestPermissionsAsync();
                     if (permissionStatus.status !== 'granted') {
                         setErrorMsg('Please provide permission to access device motion');
                         return;
-                    } else {
-                        setStatus(true);
-                        setErrorMsg(null);
-
-                        subscription.current = DeviceMotion.addListener(motionData => {
-                            try {
-                                if (isActive && motionData.acceleration) {
-                                    setData(motionData.acceleration);
-                                } 
-                            } catch (e) {
-                                
-                                setErrorMsg('An error occurred while processing device motion data');
-                            }
-                        });
                     }
+
+                    setStatus(true);
+                    setErrorMsg(null);
+
+                    // Subscribe to DeviceMotion updates
+                    subscription.current = DeviceMotion.addListener(motionData => {
+                        try {
+                            if (isActive && motionData.acceleration) {
+                                setData(motionData.acceleration);
+                            }
+                        } catch (e) {
+                            setErrorMsg('An error occurred while processing device motion data');
+                        }
+                    });
                 } catch (e) {
                     setErrorMsg('An error occurred while requesting device motion permission');
                 }
             })();
 
-
-
+            // Cleanup on component blur or unmount
             return () => {
                 isActive = false;
                 if (subscription.current) {
-                    // console.log('Motion Acceleration listener removed');
                     subscription.current.remove();
                     subscription.current = null;
                 }
@@ -70,11 +73,12 @@ export default function MotionAccGrav({ delay, collectData, data }) {
     );
 
     return (
-
         <View style={styles.container}>
             <View style={styles.titleView}>
                 <Text style={styles.title}>Acceleration (Gravity)</Text>
             </View>
+
+            {/* If no error, show the sensor readings */}
             {!errorMsg &&
                 <>
                     <View style={styles.subContainer}>
@@ -117,14 +121,12 @@ export default function MotionAccGrav({ delay, collectData, data }) {
                 </>
             }
 
-            {
-                errorMsg &&
+            {/* If error occurred, show error message */}
+            {errorMsg &&
                 <View style={styles.errorView}>
                     <Text>{errorMsg}</Text>
                 </View>
             }
-
         </View>
-
     );
 }

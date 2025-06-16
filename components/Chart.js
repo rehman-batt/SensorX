@@ -8,6 +8,7 @@ import {
   Dimensions,
 } from 'react-native';
 
+// Define custom colors for consistent theming
 const backgroundColor = '#f2f2f2';
 const foregroundColor1 = '#0e4c92';
 const buttonBackground = '#0e4c92';
@@ -22,9 +23,11 @@ const zAxisColor = '#6D28D9';
 const textSecondary = '#64748b';
 
 
-
+// LiveChart displays current sensor readings and line chart for X, Y, Z axes
 const LiveChart = ({ name1, data1, name2, data2, name3, data3 }) => {
   const length = data1.length;
+
+  // Chart styling configuration
   const chartConfig = {
     backgroundColor: cardBackground,
     backgroundGradientFrom: cardBackground,
@@ -115,7 +118,7 @@ const LiveChart = ({ name1, data1, name2, data2, name3, data3 }) => {
   );
 };
 
-
+// Styling for layout and design
 const styles = StyleSheet.create({
   container: {
     flex: 1,

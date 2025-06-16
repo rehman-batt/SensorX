@@ -6,20 +6,20 @@ import { geohashQueryBounds, distanceBetween } from "geofire-common";
 import Icon from 'react-native-vector-icons/FontAwesome6';
 
 const MapScreen = () => {
-  const [conditionData, setConditionData] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [region, setRegion] = useState({
+  const [conditionData, setConditionData] = useState([]); // Stores fetched road condition data
+  const [loading, setLoading] = useState(false);          // Controls activity indicator visibility
+  const [region, setRegion] = useState({                  // Initial map region
     latitude: 33.656463,
     longitude: 73.015318,
     latitudeDelta: 0.015,
     longitudeDelta: 0.015,
   });
 
-  const mapRef = useRef(null);
+  const mapRef = useRef(null); // Reference to the MapView instance
 
-  // Function to calculate dynamic search radius
+  // Calculates search radius based on map zoom level (region deltas)
   const getSearchRadius = (region) => {
-    const earthRadius = 6371000; // meters
+    const earthRadius = 6371000; // Earth's radius in meters
 
     const latDeltaInRad = region.latitudeDelta * (Math.PI / 180);
     const lonDeltaInRad = region.longitudeDelta * (Math.PI / 180);
@@ -27,13 +27,12 @@ const MapScreen = () => {
     const latRadius = (latDeltaInRad / 2) * earthRadius;
     const lonRadius = (lonDeltaInRad / 2) * earthRadius * Math.cos(region.latitude * (Math.PI / 180));
 
-    return Math.min(latRadius, lonRadius, 2500);
+    return Math.min(latRadius, lonRadius, 2500); // Limit max radius to 2.5km
   };
 
-
-  // Fetch slope data based on map center & zoom level
+  // Fetch condition data from Firebase within computed geohash bounds
   const fetchConditionData = async () => {
-    setLoading(true);
+    setLoading(true); // Show loader
     const searchRadius = getSearchRadius(region);
     console.log(`Fetching data within ${searchRadius} meters`);
 
@@ -41,6 +40,7 @@ const MapScreen = () => {
       const bounds = geohashQueryBounds([region.latitude, region.longitude], searchRadius);
       let conditionResults = [];
 
+      // Query Firebase for each geohash bound range
       const promises = bounds.map(([start, end]) => {
         return firebase
           .app()
@@ -54,11 +54,15 @@ const MapScreen = () => {
 
       const snapshots = await Promise.all(promises);
 
+      // Filter results within actual distance radius
       snapshots.forEach((snapshot) => {
         if (snapshot.exists()) {
           snapshot.forEach((child) => {
             const condition = child.val();
-            const distance = distanceBetween([region.latitude, region.longitude], [condition.lat, condition.long]);
+            const distance = distanceBetween(
+              [region.latitude, region.longitude],
+              [condition.lat, condition.long]
+            );
 
             if (distance <= searchRadius) {
               conditionResults.push(condition);
@@ -68,21 +72,22 @@ const MapScreen = () => {
       });
 
       console.log("Points Checked:", conditionResults.length);
-      setConditionData(conditionResults);
+      setConditionData(conditionResults); // Update map markers
     } catch (error) {
       console.error("Error fetching condition data:", error);
     } finally {
-      setLoading(false);  // Stop loading
+      setLoading(false); // Hide loader
     }
   };
 
-  // Called when the map region changes
+  // Update region state when map view changes
   const onRegionChangeComplete = (newRegion) => {
     setRegion(newRegion);
   };
 
   return (
     <View style={{ flex: 1 }}>
+      {/* MapView showing terrain and current location */}
       <MapView
         ref={mapRef}
         style={{ flex: 1 }}
@@ -92,6 +97,7 @@ const MapScreen = () => {
         showsUserLocation={true}
         showsMyLocationButton={true}
       >
+        {/* Render condition circles on map */}
         {conditionData.map((condition, index) => (
           <Circle
             key={index}
@@ -99,23 +105,22 @@ const MapScreen = () => {
             radius={12}
             strokeWidth={1}
             strokeColor={condition.color}
-            fillColor={`${condition.color}80`}
-
+            fillColor={`${condition.color}80`} // Add transparency to fill
           />
         ))}
       </MapView>
 
+      {/* Loading spinner during data fetch */}
       {loading && (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#0e4c92" style={{ transform: [{ scale: 1.5 }] }} />
         </View>
       )}
 
-      {/* Styled Button */}
+      {/* Floating button to trigger data fetch */}
       <TouchableOpacity style={styles.button} onPress={fetchConditionData} disabled={loading}>
         <Icon name="road-circle-exclamation" size={30} color="white" />
       </TouchableOpacity>
-
     </View>
   );
 };
@@ -125,7 +130,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 20,
     right: 20,
-    // backgroundColor: "#0e4c92",
     backgroundColor: '#EF4444',
     width: 60,
     height: 60,
@@ -133,8 +137,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     elevation: 3,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   buttonText: {
     color: "white",
@@ -143,7 +145,7 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.3)",
+    backgroundColor: "rgba(0,0,0,0.3)", // Dark semi-transparent overlay
     justifyContent: "center",
     alignItems: "center",
   },
